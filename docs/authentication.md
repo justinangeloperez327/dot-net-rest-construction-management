@@ -8,6 +8,10 @@ Identity is an Infrastructure concern. `ApplicationUser`, roles, password hashes
 
 Public self-registration is intentionally not exposed. Construction-management accounts should be provisioned through controlled administration workflows.
 
+## Identity schema
+
+The store explicitly uses ASP.NET Core Identity schema version 2. Passkey/WebAuthn persistence is intentionally not enabled in this group because the API currently supports password + JWT authentication only. Passkeys can be added later as a separate authentication capability.
+
 ## Access tokens
 
 Access tokens are JWTs signed with HMAC SHA-256 and contain user identifier, email, display name, token identifier, and role claims.
