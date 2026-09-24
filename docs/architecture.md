@@ -22,7 +22,7 @@ The Domain project must not depend on ASP.NET Core, Entity Framework Core, datab
 
 ## Domain kernel
 
-The Domain layer now provides the shared primitives required by later construction-management modules:
+The Domain layer provides:
 
 - identity-based entities;
 - aggregate roots;
@@ -31,4 +31,18 @@ The Domain layer now provides the shared primitives required by later constructi
 - domain exceptions;
 - auditable entities.
 
-Business entities such as Project, RFI, Submittal, Inspection, Equipment, Purchase Request, and Purchase Order will be implemented vertically in later groups rather than added as speculative placeholders.
+## Application kernel
+
+The Application layer provides:
+
+- commands, queries, handlers, and dispatch contracts;
+- pipeline behavior contracts;
+- result and error types;
+- validation contracts;
+- pagination and sorting primitives;
+- strongly typed filtering convention;
+- current-user, persistence-boundary, file-storage, email, and notification abstractions.
+
+Application depends only on Domain and the .NET base class library. Persistence, HTTP, authentication mechanisms, and other external technology remain outside the Application layer.
+
+Business entities and use cases are implemented vertically in later groups rather than added as speculative placeholders.
