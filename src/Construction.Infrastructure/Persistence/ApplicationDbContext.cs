@@ -13,15 +13,15 @@ public sealed class ApplicationDbContext(
 {
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        ArgumentNullException.ThrowIfNull(modelBuilder);
+        ArgumentNullException.ThrowIfNull(builder);
 
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
 
-        modelBuilder.ApplyConfigurationsFromAssembly(
+        builder.ApplyConfigurationsFromAssembly(
             typeof(ApplicationDbContext).Assembly);
 
-        IdentityTableConfiguration.Apply(modelBuilder);
+        IdentityTableConfiguration.Apply(builder);
     }
 }
