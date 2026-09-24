@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Construction.Api/Construction.Api.csproj" />
+    <ProjectReference Include="../../src/Construction.Infrastructure/Construction.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

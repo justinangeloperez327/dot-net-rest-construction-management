@@ -1,0 +1,4 @@
+services:
+  api:
+    environment:
+      Logging__LogLevel__Default: Information
