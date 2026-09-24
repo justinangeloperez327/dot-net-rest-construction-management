@@ -37,12 +37,27 @@ The Application layer provides:
 
 - commands, queries, handlers, and dispatch contracts;
 - pipeline behavior contracts;
-- result and error types;
+- result and application-error types;
 - validation contracts;
 - pagination and sorting primitives;
 - strongly typed filtering convention;
 - current-user, persistence-boundary, file-storage, email, and notification abstractions.
 
-Application depends only on Domain and the .NET base class library. Persistence, HTTP, authentication mechanisms, and other external technology remain outside the Application layer.
+Application depends only on Domain and the .NET base class library.
 
-Business entities and use cases are implemented vertically in later groups rather than added as speculative placeholders.
+## Infrastructure persistence
+
+Infrastructure now owns:
+
+- Entity Framework Core;
+- the PostgreSQL provider;
+- `ApplicationDbContext`;
+- persistence configuration discovery;
+- audit timestamp interception;
+- migration tooling and initialization;
+- connection resiliency;
+- database health checks.
+
+No database provider or Entity Framework Core type crosses into Domain or Application.
+
+Business entities and use cases continue to be implemented vertically in later groups rather than added as speculative placeholders.

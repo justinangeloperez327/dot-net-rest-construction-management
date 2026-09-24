@@ -1,1 +1,5 @@
-Write-Output "Database migrations are not implemented yet."
+dotnet tool restore
+
+dotnet ef database update `
+  --project src/Construction.Infrastructure/Construction.Infrastructure.csproj `
+  --startup-project src/Construction.Api/Construction.Api.csproj

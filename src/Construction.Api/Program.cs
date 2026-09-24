@@ -1,7 +1,14 @@
+using Construction.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
+string databaseConnectionString =
+    builder.Configuration.GetConnectionString("Database")
+    ?? throw new InvalidOperationException(
+        "Connection string 'Database' is required.");
+
 builder.Services.AddControllers();
-builder.Services.AddHealthChecks();
+builder.Services.AddInfrastructure(databaseConnectionString);
 
 var app = builder.Build();
 
