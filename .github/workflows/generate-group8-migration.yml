@@ -1,0 +1,40 @@
+name: Generate Group 8 Migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/generate-group8-migration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - run: dotnet tool restore
+      - run: dotnet restore Construction.sln
+
+      - name: Generate migration
+        run: >
+          dotnet ef migrations add AddCompanyProjectFoundation
+          --project src/Construction.Infrastructure/Construction.Infrastructure.csproj
+          --startup-project src/Construction.Api/Construction.Api.csproj
+          --output-dir Persistence/Migrations
+
+      - name: Commit migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/Construction.Infrastructure/Persistence/Migrations
+          git commit -m "feat: add company project foundation migration"
+          git push origin HEAD:main
