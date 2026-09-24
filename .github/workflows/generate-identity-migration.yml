@@ -1,4 +1,5 @@
 name: Generate Identity Migration
+# one-time Group 6 schema generation
 
 on:
   push:
