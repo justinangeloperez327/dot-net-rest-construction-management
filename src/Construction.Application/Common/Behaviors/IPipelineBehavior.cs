@@ -4,6 +4,6 @@ public interface IPipelineBehavior<in TRequest, TResponse>
 {
     Task<TResponse> HandleAsync(
         TRequest request,
-        RequestHandlerDelegate<TResponse> next,
+        HandlerContinuation<TResponse> continuation,
         CancellationToken cancellationToken = default);
 }

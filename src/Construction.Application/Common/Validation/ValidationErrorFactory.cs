@@ -4,12 +4,12 @@ namespace Construction.Application.Common.Validation;
 
 public static class ValidationErrorFactory
 {
-    public static Error[] Create(IEnumerable<ValidationFailure> failures)
+    public static ApplicationError[] Create(IEnumerable<ValidationFailure> failures)
     {
         ArgumentNullException.ThrowIfNull(failures);
 
         return failures
-            .Select(failure => Error.Validation(
+            .Select(failure => ApplicationError.Validation(
                 failure.ErrorCode,
                 string.IsNullOrWhiteSpace(failure.PropertyName)
                     ? failure.Message

@@ -4,9 +4,9 @@ namespace Construction.Application.Common.Results;
 
 public class Result : IResult
 {
-    private readonly Error[] _errors;
+    private readonly ApplicationError[] _errors;
 
-    protected Result(bool isSuccess, IEnumerable<Error> errors)
+    protected Result(bool isSuccess, IEnumerable<ApplicationError> errors)
     {
         ArgumentNullException.ThrowIfNull(errors);
 
@@ -29,9 +29,18 @@ public class Result : IResult
 
     public bool IsFailure => !IsSuccess;
 
-    public IReadOnlyCollection<Error> Errors => _errors;
+    public IReadOnlyCollection<ApplicationError> Errors => _errors;
 
     public static Result Success() => new(true, []);
 
-    public static Result Failure(params Error[] errors) => new(false, errors);
+    public static Result Failure(params ApplicationError[] errors) => new(false, errors);
+
+    public static Result<TValue> Success<TValue>(TValue value)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+        return new Result<TValue>(value);
+    }
+
+    public static Result<TValue> Failure<TValue>(params ApplicationError[] errors) =>
+        new(errors);
 }

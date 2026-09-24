@@ -8,5 +8,5 @@ public interface IResult
 
     bool IsFailure { get; }
 
-    IReadOnlyCollection<Error> Errors { get; }
+    IReadOnlyCollection<ApplicationError> Errors { get; }
 }
