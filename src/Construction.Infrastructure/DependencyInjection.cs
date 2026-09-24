@@ -7,6 +7,7 @@ using Construction.Infrastructure.Authorization;
 using Construction.Infrastructure.Identity;
 using Construction.Infrastructure.Persistence;
 using Construction.Infrastructure.Persistence.Interceptors;
+using Construction.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -113,8 +114,16 @@ public static class DependencyInjection
             serviceProvider =>
                 serviceProvider.GetRequiredService<ApplicationDbContext>());
 
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
+        services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
+        services.AddScoped<IProjectLocationRepository, ProjectLocationRepository>();
+
+        services.AddScoped<IUserDirectory, IdentityUserDirectory>();
         services.AddScoped<IPermissionService, PermissionService>();
+        services.AddScoped<IProjectAccessService, ProjectAccessService>();
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
+
         services.AddScoped<JwtTokenService>();
         services.AddScoped<IdentitySeeder>();
         services.AddScoped<DatabaseInitializer>();

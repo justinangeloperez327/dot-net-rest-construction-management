@@ -1,0 +1,8 @@
+using Construction.Domain.Locations;
+
+namespace Construction.Api.Contracts.Locations;
+
+public sealed record CreateProjectLocationRequest(
+    string Name,
+    LocationType Type,
+    Guid? ParentLocationId);

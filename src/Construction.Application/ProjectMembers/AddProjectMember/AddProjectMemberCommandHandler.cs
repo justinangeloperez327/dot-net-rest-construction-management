@@ -12,6 +12,7 @@ namespace Construction.Application.ProjectMembers.AddProjectMember;
 public sealed class AddProjectMemberCommandHandler(
     IProjectRepository projects,
     IProjectMemberRepository members,
+    IUserDirectory users,
     IApplicationDbContext dbContext,
     ICurrentUser currentUser,
     IProjectAccessService projectAccessService)
@@ -42,6 +43,14 @@ public sealed class AddProjectMemberCommandHandler(
                 ApplicationError.NotFound(
                     "Projects.NotFound",
                     "The project was not found."));
+        }
+
+        if (!await users.ExistsAsync(command.UserId, cancellationToken))
+        {
+            return Result.Failure<ProjectMemberResponse>(
+                ApplicationError.NotFound(
+                    "Users.NotFound",
+                    "The user was not found."));
         }
 
         var existing = await members.GetAsync(
