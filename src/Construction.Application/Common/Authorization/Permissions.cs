@@ -21,6 +21,7 @@ public static class Permissions
         public const string Update = "projects.update";
         public const string Archive = "projects.archive";
         public const string ManageMembers = "projects.members.manage";
+        public const string AccessAll = "projects.access-all";
     }
 
     public static class Activities
@@ -107,6 +108,7 @@ public static class Permissions
             Projects.Update,
             Projects.Archive,
             Projects.ManageMembers,
+            Projects.AccessAll,
             Activities.View,
             Activities.Manage,
             DailyProgress.View,
