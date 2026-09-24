@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Construction.Application.Abstractions.Authentication;
+using Construction.Infrastructure.Authorization;
 
 namespace Construction.Api.Authentication;
 
@@ -17,7 +18,8 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor)
         get
         {
             string? value =
-                Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+                Principal?.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
             return Guid.TryParse(value, out Guid userId)
                 ? userId
@@ -30,8 +32,15 @@ public sealed class CurrentUser(IHttpContextAccessor httpContextAccessor)
             .FindAll(ClaimTypes.Role)
             .Select(claim => claim.Value)
             .ToHashSet(StringComparer.OrdinalIgnoreCase)
-        ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        ?? new HashSet<string>(
+            StringComparer.OrdinalIgnoreCase);
 
     public IReadOnlySet<string> Permissions =>
-        new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        Principal?
+            .FindAll(
+                AuthorizationClaimTypes.Permission)
+            .Select(claim => claim.Value)
+            .ToHashSet(StringComparer.Ordinal)
+        ?? new HashSet<string>(
+            StringComparer.Ordinal);
 }

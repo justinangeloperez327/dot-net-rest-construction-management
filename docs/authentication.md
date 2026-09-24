@@ -10,11 +10,19 @@ Public self-registration is intentionally not exposed. Construction-management a
 
 ## Identity schema
 
-The store explicitly uses ASP.NET Core Identity schema version 2. Passkey/WebAuthn persistence is intentionally not enabled in this group because the API currently supports password + JWT authentication only. Passkeys can be added later as a separate authentication capability.
+The store explicitly uses ASP.NET Core Identity schema version 2. Passkey/WebAuthn persistence is intentionally not enabled because the current API supports password + JWT authentication only.
 
 ## Access tokens
 
-Access tokens are JWTs signed with HMAC SHA-256 and contain user identifier, email, display name, token identifier, and role claims.
+Access tokens are JWTs signed with HMAC SHA-256 and contain:
+
+- subject/user identifier;
+- name identifier;
+- email;
+- display name;
+- token identifier;
+- role claims;
+- permission claims.
 
 The default access-token lifetime is 15 minutes.
 
@@ -47,6 +55,7 @@ Logout revokes the submitted refresh token and is idempotent.
 POST /api/v1/auth/login
 POST /api/v1/auth/refresh
 POST /api/v1/auth/logout
+GET  /api/v1/auth/me
 ```
 
 Login and refresh failures intentionally use generic error messages to avoid account enumeration.

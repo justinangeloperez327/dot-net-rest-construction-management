@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Construction.Application.Abstractions.Authentication;
+using Construction.Application.Abstractions.Authorization;
 using Construction.Application.Common.Errors;
 using Construction.Application.Common.Results;
 using Construction.Infrastructure.Identity;
@@ -12,6 +13,7 @@ namespace Construction.Infrastructure.Authentication;
 
 public sealed class IdentityAuthenticationService(
     UserManager<ApplicationUser> userManager,
+    IPermissionService permissionService,
     ApplicationDbContext dbContext,
     JwtTokenService jwtTokenService,
     JwtOptions jwtOptions,
@@ -44,7 +46,8 @@ public sealed class IdentityAuthenticationService(
                     "The account is temporarily locked."));
         }
 
-        bool validPassword = await userManager.CheckPasswordAsync(user, password);
+        bool validPassword =
+            await userManager.CheckPasswordAsync(user, password);
 
         if (!validPassword)
         {
@@ -82,7 +85,8 @@ public sealed class IdentityAuthenticationService(
 
         if (storedToken.RevokedAtUtc is not null)
         {
-            if (!string.IsNullOrWhiteSpace(storedToken.ReplacedByTokenHash))
+            if (!string.IsNullOrWhiteSpace(
+                storedToken.ReplacedByTokenHash))
             {
                 await RevokeActiveTokensForUserAsync(
                     storedToken.UserId,
@@ -98,8 +102,10 @@ public sealed class IdentityAuthenticationService(
             return InvalidRefreshToken();
         }
 
-        IReadOnlyCollection<string> roles =
-            (await userManager.GetRolesAsync(storedToken.User)).ToArray();
+        AuthorizationContext authorizationContext =
+            await GetAuthorizationContextAsync(
+                storedToken.User,
+                cancellationToken);
 
         string newRawRefreshToken = GenerateRefreshToken();
         string newTokenHash = HashToken(newRawRefreshToken);
@@ -116,7 +122,10 @@ public sealed class IdentityAuthenticationService(
         dbContext.RefreshTokens.Add(replacement);
 
         (string accessToken, DateTimeOffset expiresAtUtc) =
-            jwtTokenService.CreateAccessToken(storedToken.User, roles);
+            jwtTokenService.CreateAccessToken(
+                storedToken.User,
+                authorizationContext.Roles,
+                authorizationContext.Permissions);
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -156,10 +165,16 @@ public sealed class IdentityAuthenticationService(
         ApplicationUser user,
         CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<string> roles = (await userManager.GetRolesAsync(user)).ToArray();
+        AuthorizationContext authorizationContext =
+            await GetAuthorizationContextAsync(
+                user,
+                cancellationToken);
 
         (string accessToken, DateTimeOffset expiresAtUtc) =
-            jwtTokenService.CreateAccessToken(user, roles);
+            jwtTokenService.CreateAccessToken(
+                user,
+                authorizationContext.Roles,
+                authorizationContext.Permissions);
 
         string rawRefreshToken = GenerateRefreshToken();
         string refreshTokenHash = HashToken(rawRefreshToken);
@@ -178,6 +193,23 @@ public sealed class IdentityAuthenticationService(
             accessToken,
             rawRefreshToken,
             expiresAtUtc));
+    }
+
+    private async Task<AuthorizationContext> GetAuthorizationContextAsync(
+        ApplicationUser user,
+        CancellationToken cancellationToken)
+    {
+        string[] roles =
+            [.. await userManager.GetRolesAsync(user)];
+
+        IReadOnlySet<string> permissions =
+            await permissionService.GetPermissionsAsync(
+                user.Id,
+                cancellationToken);
+
+        return new AuthorizationContext(
+            roles,
+            permissions);
     }
 
     private async Task RevokeActiveTokensForUserAsync(
@@ -201,11 +233,13 @@ public sealed class IdentityAuthenticationService(
     }
 
     private static string GenerateRefreshToken() =>
-        Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        Convert.ToBase64String(
+            RandomNumberGenerator.GetBytes(64));
 
     private static string HashToken(string token) =>
         Convert.ToHexString(
-            SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+            SHA256.HashData(
+                Encoding.UTF8.GetBytes(token)));
 
     private static Result<AuthenticationTokens> InvalidCredentials() =>
         Result.Failure<AuthenticationTokens>(
@@ -218,4 +252,8 @@ public sealed class IdentityAuthenticationService(
             ApplicationError.Unauthorized(
                 "Authentication.InvalidRefreshToken",
                 "The refresh token is invalid or expired."));
+
+    private sealed record AuthorizationContext(
+        IReadOnlyCollection<string> Roles,
+        IReadOnlyCollection<string> Permissions);
 }

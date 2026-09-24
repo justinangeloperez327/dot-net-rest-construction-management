@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Construction.Infrastructure.Authorization;
 using Construction.Infrastructure.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -12,10 +13,12 @@ public sealed class JwtTokenService(
 {
     public (string Token, DateTimeOffset ExpiresAtUtc) CreateAccessToken(
         ApplicationUser user,
-        IReadOnlyCollection<string> roles)
+        IReadOnlyCollection<string> roles,
+        IReadOnlyCollection<string> permissions)
     {
         ArgumentNullException.ThrowIfNull(user);
         ArgumentNullException.ThrowIfNull(roles);
+        ArgumentNullException.ThrowIfNull(permissions);
 
         DateTimeOffset now = timeProvider.GetUtcNow();
         DateTimeOffset expiresAt = now.AddMinutes(options.AccessTokenMinutes);
@@ -29,7 +32,15 @@ public sealed class JwtTokenService(
             new(ClaimTypes.Email, user.Email ?? string.Empty)
         };
 
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        claims.AddRange(
+            roles.Select(role =>
+                new Claim(ClaimTypes.Role, role)));
+
+        claims.AddRange(
+            permissions.Select(permission =>
+                new Claim(
+                    AuthorizationClaimTypes.Permission,
+                    permission)));
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(options.SigningKey));

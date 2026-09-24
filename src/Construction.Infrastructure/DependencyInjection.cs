@@ -1,11 +1,14 @@
 using System.Text;
 using Construction.Application.Abstractions.Authentication;
+using Construction.Application.Abstractions.Authorization;
 using Construction.Application.Abstractions.Data;
 using Construction.Infrastructure.Authentication;
+using Construction.Infrastructure.Authorization;
 using Construction.Infrastructure.Identity;
 using Construction.Infrastructure.Persistence;
 using Construction.Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,7 +49,10 @@ public static class DependencyInjection
                         errorCodesToAdd: null);
 
                     npgsqlOptions.MigrationsAssembly(
-                        typeof(ApplicationDbContext).Assembly.GetName().Name);
+                        typeof(ApplicationDbContext)
+                            .Assembly
+                            .GetName()
+                            .Name);
                 });
 
             options.AddInterceptors(auditInterceptor);
@@ -55,7 +61,9 @@ public static class DependencyInjection
         services
             .AddIdentityCore<ApplicationUser>(options =>
             {
-                options.Stores.SchemaVersion = IdentitySchemaVersions.Version2;
+                options.Stores.SchemaVersion =
+                    IdentitySchemaVersions.Version2;
+
                 options.User.RequireUniqueEmail = true;
 
                 options.Password.RequiredLength = 12;
@@ -77,30 +85,38 @@ public static class DependencyInjection
             .AddJwtBearer(options =>
             {
                 options.MapInboundClaims = false;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtOptions.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = jwtOptions.Audience,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
-                    ClockSkew = TimeSpan.FromSeconds(30),
-                    NameClaimType = "name",
-                    RoleClaimType = "role"
-                };
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtOptions.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = jwtOptions.Audience,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(
+                                    jwtOptions.SigningKey)),
+                        ClockSkew = TimeSpan.FromSeconds(30),
+                        NameClaimType = "name",
+                        RoleClaimType = "role"
+                    };
             });
 
         services.AddAuthorization();
+
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
         services.AddScoped<IApplicationDbContext>(
             serviceProvider =>
                 serviceProvider.GetRequiredService<ApplicationDbContext>());
 
+        services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
         services.AddScoped<JwtTokenService>();
+        services.AddScoped<IdentitySeeder>();
         services.AddScoped<DatabaseInitializer>();
 
         services

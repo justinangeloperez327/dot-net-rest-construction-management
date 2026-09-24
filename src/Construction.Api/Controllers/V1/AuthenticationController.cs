@@ -1,6 +1,7 @@
 using Construction.Api.Configuration;
 using Construction.Api.Contracts.Authentication;
 using Construction.Api.Extensions;
+using Construction.Application.Abstractions.Authentication;
 using Construction.Application.Authentication.Login;
 using Construction.Application.Authentication.Logout;
 using Construction.Application.Authentication.RefreshToken;
@@ -14,7 +15,8 @@ namespace Construction.Api.Controllers.V1;
 public sealed class AuthenticationController(
     LoginCommandHandler loginHandler,
     RefreshTokenCommandHandler refreshHandler,
-    LogoutCommandHandler logoutHandler)
+    LogoutCommandHandler logoutHandler,
+    ICurrentUser currentUser)
     : ControllerBase
 {
     [AllowAnonymous]
@@ -24,7 +26,9 @@ public sealed class AuthenticationController(
         CancellationToken cancellationToken)
     {
         var result = await loginHandler.HandleAsync(
-            new LoginCommand(request.Email, request.Password),
+            new LoginCommand(
+                request.Email,
+                request.Password),
             cancellationToken);
 
         return result.ToActionResult();
@@ -37,7 +41,8 @@ public sealed class AuthenticationController(
         CancellationToken cancellationToken)
     {
         var result = await refreshHandler.HandleAsync(
-            new RefreshTokenCommand(request.RefreshToken),
+            new RefreshTokenCommand(
+                request.RefreshToken),
             cancellationToken);
 
         return result.ToActionResult();
@@ -50,9 +55,25 @@ public sealed class AuthenticationController(
         CancellationToken cancellationToken)
     {
         var result = await logoutHandler.HandleAsync(
-            new LogoutCommand(request.RefreshToken),
+            new LogoutCommand(
+                request.RefreshToken),
             cancellationToken);
 
         return result.ToActionResult();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult GetCurrentUser()
+    {
+        if (currentUser.UserId is not Guid userId)
+        {
+            return Unauthorized();
+        }
+
+        return Ok(new CurrentUserResponse(
+            userId,
+            currentUser.Roles,
+            currentUser.Permissions));
     }
 }
