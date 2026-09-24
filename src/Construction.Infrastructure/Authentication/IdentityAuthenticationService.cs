@@ -99,7 +99,7 @@ public sealed class IdentityAuthenticationService(
         }
 
         IReadOnlyCollection<string> roles =
-            await userManager.GetRolesAsync(storedToken.User);
+            (await userManager.GetRolesAsync(storedToken.User)).ToArray();
 
         string newRawRefreshToken = GenerateRefreshToken();
         string newTokenHash = HashToken(newRawRefreshToken);
@@ -156,7 +156,7 @@ public sealed class IdentityAuthenticationService(
         ApplicationUser user,
         CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<string> roles = await userManager.GetRolesAsync(user);
+        IReadOnlyCollection<string> roles = (await userManager.GetRolesAsync(user)).ToArray();
 
         (string accessToken, DateTimeOffset expiresAtUtc) =
             jwtTokenService.CreateAccessToken(user, roles);
