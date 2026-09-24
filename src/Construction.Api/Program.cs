@@ -1,3 +1,4 @@
+using Construction.Api.Extensions;
 using Construction.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,14 +8,13 @@ string databaseConnectionString =
     ?? throw new InvalidOperationException(
         "Connection string 'Database' is required.");
 
-builder.Services.AddControllers();
+builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddInfrastructure(databaseConnectionString);
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-app.MapControllers();
-app.MapHealthChecks("/health");
+app.UseApiPipeline();
+app.MapApiEndpoints();
 
 app.Run();
 

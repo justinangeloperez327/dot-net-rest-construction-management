@@ -22,42 +22,34 @@ The Domain project must not depend on ASP.NET Core, Entity Framework Core, datab
 
 ## Domain kernel
 
-The Domain layer provides:
-
-- identity-based entities;
-- aggregate roots;
-- domain events;
-- value objects;
-- domain exceptions;
-- auditable entities.
+The Domain layer provides identity-based entities, aggregate roots, domain events, value objects, domain exceptions, and auditable entities.
 
 ## Application kernel
 
-The Application layer provides:
-
-- commands, queries, handlers, and dispatch contracts;
-- pipeline behavior contracts;
-- result and application-error types;
-- validation contracts;
-- pagination and sorting primitives;
-- strongly typed filtering convention;
-- current-user, persistence-boundary, file-storage, email, and notification abstractions.
+The Application layer provides commands, queries, handlers, dispatch contracts, result/application-error types, validation contracts, pagination/sorting/filtering primitives, and abstractions for persistence and external capabilities.
 
 Application depends only on Domain and the .NET base class library.
 
 ## Infrastructure persistence
 
-Infrastructure now owns:
+Infrastructure owns Entity Framework Core, PostgreSQL, `ApplicationDbContext`, migrations, persistence interceptors, connection resiliency, and database health checks.
 
-- Entity Framework Core;
-- the PostgreSQL provider;
-- `ApplicationDbContext`;
-- persistence configuration discovery;
-- audit timestamp interception;
-- migration tooling and initialization;
-- connection resiliency;
-- database health checks.
+## API delivery layer
 
-No database provider or Entity Framework Core type crosses into Domain or Application.
+The API project owns HTTP concerns:
 
-Business entities and use cases continue to be implemented vertically in later groups rather than added as speculative placeholders.
+- `/api/v1` routing;
+- controllers;
+- RFC Problem Details;
+- exception-to-HTTP translation;
+- Application Result-to-HTTP translation;
+- correlation IDs;
+- request completion logging;
+- CORS;
+- rate limiting;
+- health endpoints;
+- OpenAPI generation.
+
+No HTTP type is exposed through Application or Domain.
+
+Business entities and use cases continue to be implemented vertically in later groups.

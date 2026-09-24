@@ -3,4 +3,8 @@
     <ProjectReference Include="../Construction.Application/Construction.Application.csproj" />
     <ProjectReference Include="../Construction.Infrastructure/Construction.Infrastructure.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+  </ItemGroup>
 </Project>
