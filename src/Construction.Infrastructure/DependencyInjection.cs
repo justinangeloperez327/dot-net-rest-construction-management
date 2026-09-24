@@ -55,6 +55,7 @@ public static class DependencyInjection
         services
             .AddIdentityCore<ApplicationUser>(options =>
             {
+                options.Stores.SchemaVersion = IdentitySchemaVersions.Version2;
                 options.User.RequireUniqueEmail = true;
 
                 options.Password.RequiredLength = 12;
