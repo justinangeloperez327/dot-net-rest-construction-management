@@ -24,7 +24,7 @@ public static class ResultExtensions
             : CreateFailureResult(result.Errors);
     }
 
-    private static IActionResult CreateFailureResult(
+    private static ObjectResult CreateFailureResult(
         IReadOnlyCollection<ApplicationError> errors)
     {
         ApplicationError primaryError = errors.First();
