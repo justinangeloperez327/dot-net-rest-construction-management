@@ -1,5 +1,10 @@
+using Construction.Api.Authentication;
 using Construction.Api.Configuration;
 using Construction.Api.ProblemDetails;
+using Construction.Application.Abstractions.Authentication;
+using Construction.Application.Authentication.Login;
+using Construction.Application.Authentication.Logout;
+using Construction.Application.Authentication.RefreshToken;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
@@ -23,6 +28,12 @@ public static class ServiceCollectionExtensions
         services.AddControllers();
         services.AddApiProblemDetails();
         services.AddOpenApi("v1");
+        services.AddHttpContextAccessor();
+
+        services.AddScoped<ICurrentUser, CurrentUser>();
+        services.AddScoped<LoginCommandHandler>();
+        services.AddScoped<RefreshTokenCommandHandler>();
+        services.AddScoped<LogoutCommandHandler>();
 
         services.AddCors(options =>
         {

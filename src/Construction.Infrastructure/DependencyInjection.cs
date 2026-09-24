@@ -1,9 +1,16 @@
+using System.Text;
+using Construction.Application.Abstractions.Authentication;
 using Construction.Application.Abstractions.Data;
+using Construction.Infrastructure.Authentication;
+using Construction.Infrastructure.Identity;
 using Construction.Infrastructure.Persistence;
 using Construction.Infrastructure.Persistence.Interceptors;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Construction.Infrastructure;
 
@@ -11,12 +18,17 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        string connectionString)
+        string connectionString,
+        JwtOptions jwtOptions)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+        ArgumentNullException.ThrowIfNull(jwtOptions);
+
+        ValidateJwtOptions(jwtOptions);
 
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton(jwtOptions);
         services.AddScoped<AuditableEntityInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
@@ -40,9 +52,54 @@ public static class DependencyInjection
             options.AddInterceptors(auditInterceptor);
         });
 
-        services.AddScoped<IApplicationDbContext>(
-            serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
+        services
+            .AddIdentityCore<ApplicationUser>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
 
+                options.Password.RequiredLength = 12;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan =
+                    TimeSpan.FromMinutes(15);
+            })
+            .AddRoles<ApplicationRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+
+        services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.MapInboundClaims = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtOptions.Audience,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
+                    ClockSkew = TimeSpan.FromSeconds(30),
+                    NameClaimType = "name",
+                    RoleClaimType = "role"
+                };
+            });
+
+        services.AddAuthorization();
+
+        services.AddScoped<IApplicationDbContext>(
+            serviceProvider =>
+                serviceProvider.GetRequiredService<ApplicationDbContext>());
+
+        services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
+        services.AddScoped<JwtTokenService>();
         services.AddScoped<DatabaseInitializer>();
 
         services
@@ -53,5 +110,30 @@ public static class DependencyInjection
                 tags: ["ready", "database"]);
 
         return services;
+    }
+
+    private static void ValidateJwtOptions(JwtOptions options)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.Issuer);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.Audience);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.SigningKey);
+
+        if (Encoding.UTF8.GetByteCount(options.SigningKey) < 32)
+        {
+            throw new InvalidOperationException(
+                "Authentication:Jwt:SigningKey must be at least 32 bytes.");
+        }
+
+        if (options.AccessTokenMinutes <= 0)
+        {
+            throw new InvalidOperationException(
+                "Authentication:Jwt:AccessTokenMinutes must be greater than zero.");
+        }
+
+        if (options.RefreshTokenDays <= 0)
+        {
+            throw new InvalidOperationException(
+                "Authentication:Jwt:RefreshTokenDays must be greater than zero.");
+        }
     }
 }

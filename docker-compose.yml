@@ -9,6 +9,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080
       ConnectionStrings__Database: Host=postgres;Port=5432;Database=construction;Username=construction;Password=construction
+      Authentication__Jwt__SigningKey: ${JWT_SIGNING_KEY:-development-only-signing-key-change-before-use-2026}
     depends_on:
       postgres:
         condition: service_healthy

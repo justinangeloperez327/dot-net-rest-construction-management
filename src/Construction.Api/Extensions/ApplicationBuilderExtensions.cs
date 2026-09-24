@@ -2,7 +2,6 @@ using Construction.Api.Configuration;
 using Construction.Api.HealthChecks;
 using Construction.Api.Middleware;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Construction.Api.Extensions;
 
@@ -18,6 +17,8 @@ public static class ApplicationBuilderExtensions
         app.UseHttpsRedirection();
         app.UseCors(ApiCorsPolicy.Name);
         app.UseRateLimiter();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         return app;
     }
