@@ -45,6 +45,22 @@ using Construction.Application.DailyProgress.SetDailyProgressEquipment;
 using Construction.Application.DailyProgress.SetDailyProgressManpower;
 using Construction.Application.DailyProgress.SubmitDailyProgress;
 using Construction.Application.DailyProgress.UpdateDailyProgress;
+using Construction.Application.Inspections.CancelInspection;
+using Construction.Application.Inspections.CreateInspection;
+using Construction.Application.Inspections.GetInspection;
+using Construction.Application.Inspections.GetInspections;
+using Construction.Application.Inspections.PerformInspection;
+using Construction.Application.Inspections.RequestInspection;
+using Construction.Application.Inspections.UpdateInspection;
+using Construction.Application.Issues.CancelIssue;
+using Construction.Application.Issues.CorrectiveActions;
+using Construction.Application.Issues.CreateIssue;
+using Construction.Application.Issues.GetIssue;
+using Construction.Application.Issues.GetIssues;
+using Construction.Application.Issues.StartIssue;
+using Construction.Application.Issues.SubmitIssueForVerification;
+using Construction.Application.Issues.UpdateIssue;
+using Construction.Application.Issues.VerifyIssue;
 using Construction.Application.Locations.CreateLocation;
 using Construction.Application.Locations.GetLocations;
 using Construction.Application.Locations.UpdateLocation;
@@ -210,6 +226,26 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ReviewSubmittalCommandHandler>();
         services.AddScoped<ChangeSubmittalStatusCommandHandler>();
         services.AddScoped<AddSubmittalCommentCommandHandler>();
+
+        services.AddScoped<CreateInspectionCommandHandler>();
+        services.AddScoped<GetInspectionQueryHandler>();
+        services.AddScoped<GetInspectionsQueryHandler>();
+        services.AddScoped<UpdateInspectionCommandHandler>();
+        services.AddScoped<RequestInspectionCommandHandler>();
+        services.AddScoped<StartInspectionCommandHandler>();
+        services.AddScoped<CompleteInspectionCommandHandler>();
+        services.AddScoped<CancelInspectionCommandHandler>();
+
+        services.AddScoped<CreateIssueCommandHandler>();
+        services.AddScoped<GetIssueQueryHandler>();
+        services.AddScoped<GetIssuesQueryHandler>();
+        services.AddScoped<UpdateIssueCommandHandler>();
+        services.AddScoped<StartIssueCommandHandler>();
+        services.AddScoped<AddCorrectiveActionCommandHandler>();
+        services.AddScoped<UpdateCorrectiveActionCommandHandler>();
+        services.AddScoped<SubmitIssueForVerificationCommandHandler>();
+        services.AddScoped<VerifyIssueCommandHandler>();
+        services.AddScoped<CancelIssueCommandHandler>();
 
         services.AddCors(options =>
         {
