@@ -118,6 +118,10 @@ public static class DependencyInjection
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
         services.AddScoped<IProjectLocationRepository, ProjectLocationRepository>();
+        services.AddScoped<IWorkPackageRepository, WorkPackageRepository>();
+        services.AddScoped<IActivityRepository, ActivityRepository>();
+        services.AddScoped<IActivityAssignmentRepository, ActivityAssignmentRepository>();
+        services.AddScoped<IActivityDependencyRepository, ActivityDependencyRepository>();
 
         services.AddScoped<IUserDirectory, IdentityUserDirectory>();
         services.AddScoped<IPermissionService, PermissionService>();
