@@ -34,6 +34,7 @@ public static class Permissions
     {
         public const string View = "daily-progress.view";
         public const string Manage = "daily-progress.manage";
+        public const string Approve = "daily-progress.approve";
     }
 
     public static class Documents
@@ -113,6 +114,7 @@ public static class Permissions
             Activities.Manage,
             DailyProgress.View,
             DailyProgress.Manage,
+            DailyProgress.Approve,
             Documents.View,
             Documents.Manage,
             Rfis.View,
