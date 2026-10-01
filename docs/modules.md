@@ -131,11 +131,36 @@ Submitted reports are read-only while under review. Rejected reports can be revi
 
 Daily progress preparation uses `daily-progress.manage`; approval/rejection requires the separate `daily-progress.approve` permission. Both remain subject to project access rules.
 
-File attachments will integrate with the document/attachment model in Group 11 rather than introducing a temporary storage model here.
+Daily Progress attachments now use the shared attachment subsystem described below.
+
+### Documents and attachments
+
+The project document register supports:
+
+- project-unique document numbers;
+- title, category, description, and Active/Archived lifecycle;
+- immutable revision history;
+- sequential internal version numbers;
+- user-facing revision codes;
+- one current revision at a time;
+- uploader/timestamp metadata;
+- file download without storing binary content in PostgreSQL.
+
+Document categories include Drawing, Specification, Method Statement, Procedure, Report, Contract, Correspondence, and Other.
+
+Generic attachments can currently target:
+
+- Project
+- Work Package
+- Activity
+- Daily Progress Report
+
+Attachment targets are validated against the project before upload.
+
+File bytes are stored through the Application `IFileStorage` abstraction. Local development uses filesystem storage; cloud implementations can later replace it without changing Domain/Application code.
 
 ## Planned modules
 
-- Documents and Attachments
 - RFIs
 - Submittals
 - Inspections
