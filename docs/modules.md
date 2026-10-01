@@ -157,6 +157,9 @@ Generic attachments can currently target:
 - RFI
 - Submittal
 - Submittal Revision
+- Inspection
+- Issue
+- Corrective Action
 
 Attachment targets are validated against the project before upload.
 
@@ -196,10 +199,54 @@ Preparation/submission uses `submittals.manage`. Review decisions require `submi
 
 Files may be attached to the overall Submittal or directly to a Submittal Revision using the shared attachment subsystem.
 
+### Inspections
+
+Inspections support quality/site inspection requests tied to a project and optionally to a project location and construction activity.
+
+Inspection types include General, Work, Material, Testing, Handover, and Other.
+
+The workflow is:
+
+- Draft
+- Requested
+- In Progress
+- Passed or Failed
+- Cancelled where allowed
+
+Inspection preparation uses `inspections.manage`. Performing and completing an inspection requires the separate `inspections.perform` permission. When an inspector is explicitly assigned, only that project member may start or complete the inspection.
+
+Each inspection records result notes, inspector identity, result timestamp, and immutable workflow history.
+
+### Issues and corrective actions
+
+Quality/site issues support:
+
+- Defect
+- Observation
+- Non-Conformance
+
+Severity is Low, Medium, High, or Critical.
+
+Issues can link to a project location and/or construction activity and may be assigned to an active project member.
+
+The lifecycle is:
+
+- Open
+- In Progress
+- Pending Verification
+- Closed
+- Cancelled
+
+Each issue may contain multiple corrective actions. Corrective actions have their own responsible project member, due date, Pending/In Progress/Completed/Cancelled state, completion notes, and completion metadata.
+
+An issue cannot be submitted for verification while a corrective action remains Pending or In Progress.
+
+Issue preparation and corrective work use `issues.manage`. Final close/reopen verification requires the separate `issues.verify` permission.
+
+Inspection, Issue, and Corrective Action files use the shared attachment subsystem.
+
 ## Planned modules
 
-- Inspections
-- Issues
 - Equipment
 - Suppliers
 - Purchase Requests
