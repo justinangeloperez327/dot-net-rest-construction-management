@@ -17,7 +17,7 @@ public sealed class GetSuppliersQueryHandler(
         GetSuppliersQuery query,
         CancellationToken cancellationToken = default)
     {
-        if (!currentUser.HasPermission(Permissions.Procurement.View))
+        if (!currentUser.Permissions.Contains(Permissions.Procurement.View))
         {
             return Result.Failure<PagedResult<SupplierResponse>>(
                 ApplicationError.Forbidden(
