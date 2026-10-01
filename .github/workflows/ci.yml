@@ -9,12 +9,36 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     steps:
       - uses: actions/checkout@v7
+
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - run: dotnet restore Construction.sln
-      - run: dotnet build Construction.sln --configuration Release --no-restore
+
+      - name: Restore
+        run: dotnet restore Construction.sln
+
+      - name: Build
+        run: dotnet build Construction.sln --configuration Release --no-restore
+
+      - name: Test
+        run: >
+          dotnet test Construction.sln
+          --configuration Release
+          --no-build
+          --results-directory artifacts/test-results
+          --logger "trx"
+          --collect "XPlat Code Coverage"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: artifacts/test-results
+          if-no-files-found: ignore
