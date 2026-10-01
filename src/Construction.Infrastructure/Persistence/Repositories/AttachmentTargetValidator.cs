@@ -50,6 +50,35 @@ public sealed class AttachmentTargetValidator(ApplicationDbContext dbContext)
                             && report.ProjectId == projectId,
                         cancellationToken),
 
+            AttachmentTargetType.Rfi =>
+                dbContext.Rfis
+                    .AsNoTracking()
+                    .AnyAsync(
+                        rfi =>
+                            rfi.Id == targetId
+                            && rfi.ProjectId == projectId,
+                        cancellationToken),
+
+            AttachmentTargetType.Submittal =>
+                dbContext.Submittals
+                    .AsNoTracking()
+                    .AnyAsync(
+                        submittal =>
+                            submittal.Id == targetId
+                            && submittal.ProjectId == projectId,
+                        cancellationToken),
+
+            AttachmentTargetType.SubmittalRevision =>
+                dbContext.SubmittalRevisions
+                    .AsNoTracking()
+                    .AnyAsync(
+                        revision =>
+                            revision.Id == targetId
+                            && dbContext.Submittals.Any(submittal =>
+                                submittal.Id == revision.SubmittalId
+                                && submittal.ProjectId == projectId),
+                        cancellationToken),
+
             _ => Task.FromResult(false)
         };
 }

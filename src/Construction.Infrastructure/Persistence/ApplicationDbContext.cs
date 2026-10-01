@@ -7,6 +7,8 @@ using Construction.Domain.Documents;
 using Construction.Domain.Locations;
 using Construction.Domain.ProjectMembers;
 using Construction.Domain.Projects;
+using Construction.Domain.Rfis;
+using Construction.Domain.Submittals;
 using Construction.Domain.WorkPackages;
 using Construction.Infrastructure.Authentication;
 using Construction.Infrastructure.Identity;
@@ -21,35 +23,27 @@ public sealed class ApplicationDbContext(
       IApplicationDbContext
 {
     public DbSet<Company> Companies => Set<Company>();
-
     public DbSet<Project> Projects => Set<Project>();
-
     public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
-
     public DbSet<ProjectLocation> ProjectLocations => Set<ProjectLocation>();
-
     public DbSet<WorkPackage> WorkPackages => Set<WorkPackage>();
-
     public DbSet<Activity> Activities => Set<Activity>();
-
     public DbSet<ActivityAssignment> ActivityAssignments => Set<ActivityAssignment>();
-
     public DbSet<ActivityDependency> ActivityDependencies => Set<ActivityDependency>();
-
     public DbSet<DailyProgressReport> DailyProgressReports => Set<DailyProgressReport>();
-
     public DbSet<DailyProgressActivity> DailyProgressActivities => Set<DailyProgressActivity>();
-
     public DbSet<DailyProgressManpower> DailyProgressManpower => Set<DailyProgressManpower>();
-
     public DbSet<DailyProgressEquipment> DailyProgressEquipment => Set<DailyProgressEquipment>();
-
     public DbSet<ProjectDocument> Documents => Set<ProjectDocument>();
-
     public DbSet<DocumentRevision> DocumentRevisions => Set<DocumentRevision>();
-
     public DbSet<Attachment> Attachments => Set<Attachment>();
-
+    public DbSet<Rfi> Rfis => Set<Rfi>();
+    public DbSet<RfiComment> RfiComments => Set<RfiComment>();
+    public DbSet<RfiHistoryEntry> RfiHistoryEntries => Set<RfiHistoryEntry>();
+    public DbSet<Submittal> Submittals => Set<Submittal>();
+    public DbSet<SubmittalRevision> SubmittalRevisions => Set<SubmittalRevision>();
+    public DbSet<SubmittalComment> SubmittalComments => Set<SubmittalComment>();
+    public DbSet<SubmittalHistoryEntry> SubmittalHistoryEntries => Set<SubmittalHistoryEntry>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
