@@ -11,4 +11,6 @@ public abstract class AuditableEntity<TId> : Entity<TId>, IAuditableEntity
     public DateTimeOffset CreatedAtUtc { get; private set; }
 
     public DateTimeOffset? LastModifiedAtUtc { get; private set; }
+
+    public long Version { get; private set; }
 }
