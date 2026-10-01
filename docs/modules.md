@@ -367,6 +367,29 @@ Authentication also emits explicit security audit events for:
 
 Project-scoped audit access requires `audit.view` plus normal project access. Unscoped/global audit additionally requires `projects.access-all`.
 
+### Reporting API
+
+Reporting is implemented as a read-only Application abstraction backed by optimized EF Core projections. Report queries use `AsNoTracking()` and database-side aggregation instead of hydrating full aggregates.
+
+All report endpoints require `reports.view` and normal project access.
+
+Available project reports:
+
+- summary;
+- activities;
+- daily progress;
+- quality;
+- procurement/equipment.
+
+The summary report provides project identity/status, average activity progress, activity status counts, daily progress state, RFIs, Submittals, inspection/issue quality indicators, equipment state, and procurement workflow counts.
+
+Activity reporting includes an explicit average activity progress percentage and an exception list of overdue activities. It is intentionally not presented as earned-value or weighted project completion because the current model does not contain activity weights/cost baselines.
+
+Daily progress reporting supports a date range, defaults to the most recent 30 calendar days, and is limited to 367 calendar days per request. It aggregates report statuses, reported manpower observations/hours, and reported equipment working/idle hours.
+
+Quality reporting covers RFI, Submittal, Inspection, and Issue state, including overdue open RFIs, overdue pending Submittals, and overdue active Issues. Exception lists are capped at 50 records.
+
+Procurement reporting combines equipment state/overdue maintenance, Purchase Request workflow, Purchase Order workflow, overdue active POs, and monetary totals grouped by currency. Values in different currencies are never added together.
+
 ## Planned modules
 
-- Reporting
