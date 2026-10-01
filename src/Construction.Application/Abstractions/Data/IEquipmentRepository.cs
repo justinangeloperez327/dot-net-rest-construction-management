@@ -1,11 +1,10 @@
 using Construction.Application.Common.Pagination;
-using Construction.Domain.Equipment;
 
 namespace Construction.Application.Abstractions.Data;
 
 public interface IEquipmentRepository
 {
-    Task<Equipment?> GetAsync(
+    Task<Construction.Domain.Equipment.Equipment?> GetAsync(
         Guid id,
         CancellationToken cancellationToken = default);
 
@@ -14,10 +13,10 @@ public interface IEquipmentRepository
         string normalizedAssetCode,
         CancellationToken cancellationToken = default);
 
-    Task<(IReadOnlyCollection<Equipment> Items, long TotalCount)> GetPageAsync(
+    Task<(IReadOnlyCollection<Construction.Domain.Equipment.Equipment> Items, long TotalCount)> GetPageAsync(
         Guid projectId,
         PageRequest page,
         CancellationToken cancellationToken = default);
 
-    void Add(Equipment equipment);
+    void Add(Construction.Domain.Equipment.Equipment equipment);
 }
