@@ -28,12 +28,14 @@ jobs:
 
       - name: Test
         run: >
-          dotnet test Construction.sln
+          dotnet test
+          --solution Construction.sln
           --configuration Release
           --no-build
           --results-directory artifacts/test-results
-          --logger "trx"
-          --collect "XPlat Code Coverage"
+          --minimum-expected-tests 10
+          --coverage
+          --coverage-output-format cobertura
 
       - name: Upload test results
         if: always()
