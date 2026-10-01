@@ -4,6 +4,7 @@ using Construction.Application.Abstractions.Authorization;
 using Construction.Application.Abstractions.Data;
 using Construction.Application.Abstractions.Files;
 using Construction.Application.Abstractions.Messaging;
+using Construction.Application.Abstractions.Reports;
 using Construction.Infrastructure.Authentication;
 using Construction.Infrastructure.Authorization;
 using Construction.Infrastructure.Email;
@@ -13,6 +14,7 @@ using Construction.Infrastructure.Notifications;
 using Construction.Infrastructure.Persistence;
 using Construction.Infrastructure.Persistence.Interceptors;
 using Construction.Infrastructure.Persistence.Repositories;
+using Construction.Infrastructure.Reporting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -151,6 +153,7 @@ public static class DependencyInjection
         services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IAuditRepository, AuditRepository>();
+        services.AddScoped<IProjectReportingReadService, ProjectReportingReadService>();
 
         services.AddScoped<IUserDirectory, IdentityUserDirectory>();
         services.AddScoped<IPermissionService, PermissionService>();
