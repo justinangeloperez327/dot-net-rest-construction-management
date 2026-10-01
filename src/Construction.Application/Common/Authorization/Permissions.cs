@@ -47,12 +47,14 @@ public static class Permissions
     {
         public const string View = "rfis.view";
         public const string Manage = "rfis.manage";
+        public const string Respond = "rfis.respond";
     }
 
     public static class Submittals
     {
         public const string View = "submittals.view";
         public const string Manage = "submittals.manage";
+        public const string Review = "submittals.review";
     }
 
     public static class Inspections
@@ -119,8 +121,10 @@ public static class Permissions
             Documents.Manage,
             Rfis.View,
             Rfis.Manage,
+            Rfis.Respond,
             Submittals.View,
             Submittals.Manage,
+            Submittals.Review,
             Inspections.View,
             Inspections.Manage,
             Issues.View,
