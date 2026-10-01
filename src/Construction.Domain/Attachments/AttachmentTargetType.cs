@@ -8,5 +8,8 @@ public enum AttachmentTargetType
     DailyProgressReport = 3,
     Rfi = 4,
     Submittal = 5,
-    SubmittalRevision = 6
+    SubmittalRevision = 6,
+    Inspection = 7,
+    Issue = 8,
+    CorrectiveAction = 9
 }
