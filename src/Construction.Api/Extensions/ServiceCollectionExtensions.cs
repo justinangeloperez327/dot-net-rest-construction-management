@@ -45,6 +45,32 @@ using Construction.Application.DailyProgress.SetDailyProgressEquipment;
 using Construction.Application.DailyProgress.SetDailyProgressManpower;
 using Construction.Application.DailyProgress.SubmitDailyProgress;
 using Construction.Application.DailyProgress.UpdateDailyProgress;
+using Construction.Application.Equipment.AssignEquipment;
+using Construction.Application.Equipment.ChangeEquipmentStatus;
+using Construction.Application.Equipment.CreateEquipment;
+using Construction.Application.Equipment.GetEquipment;
+using Construction.Application.Equipment.GetEquipmentList;
+using Construction.Application.Equipment.Maintenance;
+using Construction.Application.Equipment.ReturnEquipment;
+using Construction.Application.Equipment.UpdateEquipment;
+using Construction.Application.PurchaseOrders.ChangePurchaseOrderStatus;
+using Construction.Application.PurchaseOrders.CreatePurchaseOrder;
+using Construction.Application.PurchaseOrders.GetPurchaseOrder;
+using Construction.Application.PurchaseOrders.GetPurchaseOrders;
+using Construction.Application.PurchaseOrders.IssuePurchaseOrder;
+using Construction.Application.PurchaseOrders.ReceivePurchaseOrder;
+using Construction.Application.PurchaseOrders.UpdatePurchaseOrder;
+using Construction.Application.PurchaseRequests.CancelPurchaseRequest;
+using Construction.Application.PurchaseRequests.CreatePurchaseRequest;
+using Construction.Application.PurchaseRequests.GetPurchaseRequest;
+using Construction.Application.PurchaseRequests.GetPurchaseRequests;
+using Construction.Application.PurchaseRequests.ReviewPurchaseRequest;
+using Construction.Application.PurchaseRequests.SubmitPurchaseRequest;
+using Construction.Application.PurchaseRequests.UpdatePurchaseRequest;
+using Construction.Application.Suppliers.CreateSupplier;
+using Construction.Application.Suppliers.GetSupplier;
+using Construction.Application.Suppliers.GetSuppliers;
+using Construction.Application.Suppliers.UpdateSupplier;
 using Construction.Application.Inspections.CancelInspection;
 using Construction.Application.Inspections.CreateInspection;
 using Construction.Application.Inspections.GetInspection;
@@ -246,6 +272,37 @@ public static class ServiceCollectionExtensions
         services.AddScoped<SubmitIssueForVerificationCommandHandler>();
         services.AddScoped<VerifyIssueCommandHandler>();
         services.AddScoped<CancelIssueCommandHandler>();
+
+        services.AddScoped<CreateEquipmentCommandHandler>();
+        services.AddScoped<GetEquipmentQueryHandler>();
+        services.AddScoped<GetEquipmentListQueryHandler>();
+        services.AddScoped<UpdateEquipmentCommandHandler>();
+        services.AddScoped<AssignEquipmentCommandHandler>();
+        services.AddScoped<ReturnEquipmentCommandHandler>();
+        services.AddScoped<ScheduleEquipmentMaintenanceCommandHandler>();
+        services.AddScoped<CompleteEquipmentMaintenanceCommandHandler>();
+        services.AddScoped<ChangeEquipmentStatusCommandHandler>();
+
+        services.AddScoped<CreateSupplierCommandHandler>();
+        services.AddScoped<GetSupplierQueryHandler>();
+        services.AddScoped<GetSuppliersQueryHandler>();
+        services.AddScoped<UpdateSupplierCommandHandler>();
+
+        services.AddScoped<CreatePurchaseRequestCommandHandler>();
+        services.AddScoped<GetPurchaseRequestQueryHandler>();
+        services.AddScoped<GetPurchaseRequestsQueryHandler>();
+        services.AddScoped<UpdatePurchaseRequestCommandHandler>();
+        services.AddScoped<SubmitPurchaseRequestCommandHandler>();
+        services.AddScoped<ReviewPurchaseRequestCommandHandler>();
+        services.AddScoped<CancelPurchaseRequestCommandHandler>();
+
+        services.AddScoped<CreatePurchaseOrderCommandHandler>();
+        services.AddScoped<GetPurchaseOrderQueryHandler>();
+        services.AddScoped<GetPurchaseOrdersQueryHandler>();
+        services.AddScoped<UpdatePurchaseOrderCommandHandler>();
+        services.AddScoped<IssuePurchaseOrderCommandHandler>();
+        services.AddScoped<ReceivePurchaseOrderCommandHandler>();
+        services.AddScoped<ChangePurchaseOrderStatusCommandHandler>();
 
         services.AddCors(options =>
         {
