@@ -48,10 +48,21 @@ public sealed class AuditableEntityInterceptor(TimeProvider timeProvider) : Save
             {
                 entry.Property(nameof(IAuditableEntity.CreatedAtUtc)).CurrentValue = utcNow;
                 entry.Property(nameof(IAuditableEntity.LastModifiedAtUtc)).CurrentValue = null;
+                entry.Property(nameof(IAuditableEntity.Version)).CurrentValue = 1L;
             }
             else if (entry.State == EntityState.Modified)
             {
                 entry.Property(nameof(IAuditableEntity.LastModifiedAtUtc)).CurrentValue = utcNow;
+
+                PropertyEntry versionProperty =
+                    entry.Property(nameof(IAuditableEntity.Version));
+
+                long originalVersion =
+                    versionProperty.OriginalValue is long version
+                        ? version
+                        : 0L;
+
+                versionProperty.CurrentValue = originalVersion + 1L;
             }
         }
     }
