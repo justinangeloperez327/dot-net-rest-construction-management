@@ -80,7 +80,9 @@ public static class Permissions
     public static class Procurement
     {
         public const string View = "procurement.view";
+        public const string ManageSuppliers = "suppliers.manage";
         public const string ManageRequests = "purchase-requests.manage";
+        public const string ApproveRequests = "purchase-requests.approve";
         public const string ManageOrders = "purchase-orders.manage";
         public const string IssueOrders = "purchase-orders.issue";
     }
@@ -136,7 +138,9 @@ public static class Permissions
             Equipment.View,
             Equipment.Manage,
             Procurement.View,
+            Procurement.ManageSuppliers,
             Procurement.ManageRequests,
+            Procurement.ApproveRequests,
             Procurement.ManageOrders,
             Procurement.IssueOrders,
             Reports.View,
