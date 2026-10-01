@@ -18,7 +18,7 @@ public sealed class UpdateSupplierCommandHandler(
         UpdateSupplierCommand command,
         CancellationToken cancellationToken = default)
     {
-        if (!currentUser.HasPermission(Permissions.Procurement.ManageSuppliers))
+        if (!currentUser.Permissions.Contains(Permissions.Procurement.ManageSuppliers))
         {
             return Result.Failure<SupplierResponse>(
                 ApplicationError.Forbidden(
