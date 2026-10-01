@@ -104,6 +104,11 @@ using Construction.Application.Projects.CreateProject;
 using Construction.Application.Projects.GetProject;
 using Construction.Application.Projects.GetProjects;
 using Construction.Application.Projects.UpdateProject;
+using Construction.Application.Reports.GetActivityReport;
+using Construction.Application.Reports.GetDailyProgressReport;
+using Construction.Application.Reports.GetProcurementReport;
+using Construction.Application.Reports.GetProjectSummary;
+using Construction.Application.Reports.GetQualityReport;
 using Construction.Application.Rfis.AddRfiComment;
 using Construction.Application.Rfis.ChangeRfiStatus;
 using Construction.Application.Rfis.CreateRfi;
@@ -316,6 +321,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetNotificationPreferencesQueryHandler>();
         services.AddScoped<UpdateNotificationPreferencesCommandHandler>();
         services.AddScoped<GetAuditLogsQueryHandler>();
+
+        services.AddScoped<GetProjectSummaryQueryHandler>();
+        services.AddScoped<GetActivityReportQueryHandler>();
+        services.AddScoped<GetDailyProgressReportQueryHandler>();
+        services.AddScoped<GetQualityReportQueryHandler>();
+        services.AddScoped<GetProcurementReportQueryHandler>();
 
         services.AddCors(options =>
         {
