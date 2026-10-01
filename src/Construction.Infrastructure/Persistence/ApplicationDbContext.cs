@@ -80,5 +80,15 @@ public sealed class ApplicationDbContext(
             typeof(ApplicationDbContext).Assembly);
 
         IdentityTableConfiguration.Apply(builder);
+
+        foreach (var entityType in builder.Model.GetEntityTypes()
+            .Where(entityType =>
+                typeof(Construction.Domain.Common.IAuditableEntity)
+                    .IsAssignableFrom(entityType.ClrType)))
+        {
+            builder.Entity(entityType.ClrType)
+                .Property(nameof(Construction.Domain.Common.IAuditableEntity.Version))
+                .IsConcurrencyToken();
+        }
     }
 }
