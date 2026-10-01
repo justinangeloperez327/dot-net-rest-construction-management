@@ -160,6 +160,10 @@ Generic attachments can currently target:
 - Inspection
 - Issue
 - Corrective Action
+- Equipment
+- Equipment Maintenance
+- Purchase Request
+- Purchase Order
 
 Attachment targets are validated against the project before upload.
 
@@ -245,12 +249,81 @@ Issue preparation and corrective work use `issues.manage`. Final close/reopen ve
 
 Inspection, Issue, and Corrective Action files use the shared attachment subsystem.
 
+### Equipment
+
+Equipment is project-scoped and identified by a project-unique asset code.
+
+The equipment register records name, make, model, serial number, and lifecycle state:
+
+- Available
+- In Use
+- Maintenance
+- Out of Service
+- Retired
+
+Equipment can be assigned to an active project member, a project location, or both. Only one assignment can be active at a time, and assignment history is retained after return.
+
+Maintenance records track scheduled date, service provider, completion date, cost, and completion notes. Assigned equipment must be returned before maintenance, out-of-service status, or retirement.
+
+Equipment and individual maintenance records support shared attachments.
+
+### Suppliers
+
+A Supplier is a procurement profile linked one-to-one to an existing active Company whose type is Supplier.
+
+Supplier profiles contain:
+
+- unique supplier code;
+- tax registration number;
+- contact details;
+- payment terms;
+- Active/Inactive status.
+
+This avoids duplicating company identity while keeping procurement-specific supplier data isolated.
+
+Supplier management requires `suppliers.manage`.
+
+### Purchase Requests
+
+Purchase Requests are project-scoped and use project-unique numbers.
+
+Each request contains line items with description, quantity, unit, and optional estimated unit cost.
+
+Workflow:
+
+- Draft
+- Submitted
+- Approved or Rejected
+- Converted when its linked Purchase Order is issued
+- Cancelled where allowed
+
+Rejected requests can be revised and return to Draft.
+
+Request preparation uses `purchase-requests.manage`; approval/rejection requires `purchase-requests.approve`.
+
+### Purchase Orders
+
+Purchase Orders are project-scoped and linked to an active Supplier. They may optionally originate from one approved Purchase Request.
+
+A Purchase Request can be linked to at most one Purchase Order.
+
+Purchase Order workflow:
+
+- Draft
+- Issued
+- Partially Delivered
+- Delivered
+- Closed
+- Cancelled where allowed
+
+Line items track ordered quantity, received quantity, unit, unit price, and line total. Receipts cannot exceed ordered quantities. The order becomes Delivered automatically when every line is fully received.
+
+PO editing and receipt recording use `purchase-orders.manage`; formal issuance requires `purchase-orders.issue`.
+
+Purchase Request and Purchase Order files use the shared attachment subsystem.
+
 ## Planned modules
 
-- Equipment
-- Suppliers
-- Purchase Requests
-- Purchase Orders
 - Notifications
 - Audit
 - Reporting
