@@ -55,7 +55,8 @@ public sealed record SubmittalSummaryCounts(
     int ApprovedWithComments,
     int Rejected,
     int Closed,
-    int Cancelled);
+    int Cancelled,
+    int OverduePending);
 
 public sealed record QualitySummaryCounts(
     int InspectionsTotal,
