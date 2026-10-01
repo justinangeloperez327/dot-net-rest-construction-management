@@ -10,10 +10,10 @@ The solution uses four test projects with separate responsibilities:
 ## Test stack
 
 - xUnit v3
-- Microsoft.NET.Test.Sdk
 - ASP.NET Core MVC testing
 - Testcontainers for PostgreSQL
-- Coverlet collector
+- Microsoft Testing Platform
+- Microsoft code coverage extension
 
 Integration tests intentionally use PostgreSQL rather than EF Core InMemory so provider behavior, constraints, migrations, query translation, and optimistic concurrency are exercised.
 
@@ -30,12 +30,13 @@ dotnet test Construction.sln --configuration Release --no-build
 To collect coverage:
 
 ```bash
-dotnet test Construction.sln \
+dotnet test \
+  --solution Construction.sln \
   --configuration Release \
   --no-build \
   --results-directory artifacts/test-results \
-  --logger "trx" \
-  --collect "XPlat Code Coverage"
+  --coverage \
+  --coverage-output-format cobertura
 ```
 
 ## Current quality coverage
