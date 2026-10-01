@@ -13,4 +13,6 @@ public abstract class AuditableAggregateRoot<TId> :
     public DateTimeOffset CreatedAtUtc { get; private set; }
 
     public DateTimeOffset? LastModifiedAtUtc { get; private set; }
+
+    public long Version { get; private set; }
 }
