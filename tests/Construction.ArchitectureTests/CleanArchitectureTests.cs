@@ -78,7 +78,7 @@ public sealed class CleanArchitectureTests
         }
     }
 
-    private static IReadOnlySet<string> GetReferences(
+    private static HashSet<string> GetReferences(
         Assembly assembly) =>
         assembly
             .GetReferencedAssemblies()

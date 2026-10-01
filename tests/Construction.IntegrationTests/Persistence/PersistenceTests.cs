@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Construction.IntegrationTests.Persistence;
 
-[Collection(IntegrationTestCollection.Name)]
+[Collection(IntegrationTestGroup.Name)]
 public sealed class PersistenceTests(
     IntegrationTestFixture fixture)
 {
@@ -27,14 +27,15 @@ public sealed class PersistenceTests(
         dbContext.Projects.Add(
             CreateProject(number, "First"));
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
         dbContext.ChangeTracker.Clear();
 
         dbContext.Projects.Add(
             CreateProject(number, "Duplicate"));
 
         await Assert.ThrowsAsync<DbUpdateException>(
-            () => dbContext.SaveChangesAsync());
+            () => dbContext.SaveChangesAsync(
+                TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -56,7 +57,8 @@ public sealed class PersistenceTests(
                 CreateProject(number, "Original");
 
             createContext.Projects.Add(project);
-            await createContext.SaveChangesAsync();
+            await createContext.SaveChangesAsync(
+                TestContext.Current.CancellationToken);
 
             projectId = project.Id;
 
@@ -79,11 +81,13 @@ public sealed class PersistenceTests(
 
         Project first =
             await firstContext.Projects.SingleAsync(
-                project => project.Id == projectId);
+                project => project.Id == projectId,
+                TestContext.Current.CancellationToken);
 
         Project stale =
             await secondContext.Projects.SingleAsync(
-                project => project.Id == projectId);
+                project => project.Id == projectId,
+                TestContext.Current.CancellationToken);
 
         first.Update(
             "First update",
@@ -94,7 +98,8 @@ public sealed class PersistenceTests(
             null,
             null);
 
-        await firstContext.SaveChangesAsync();
+        await firstContext.SaveChangesAsync(
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(2L, first.Version);
 
@@ -108,7 +113,8 @@ public sealed class PersistenceTests(
             null);
 
         await Assert.ThrowsAsync<DbUpdateConcurrencyException>(
-            () => secondContext.SaveChangesAsync());
+            () => secondContext.SaveChangesAsync(
+                TestContext.Current.CancellationToken));
     }
 
     private static Project CreateProject(

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Construction.IntegrationTests.Api;
 
-[Collection(IntegrationTestCollection.Name)]
+[Collection(IntegrationTestGroup.Name)]
 public sealed class AuthenticationApiTests(
     IntegrationTestFixture fixture)
 {
@@ -16,6 +16,9 @@ public sealed class AuthenticationApiTests(
     {
         using HttpClient client = fixture.CreateClient();
 
+        CancellationToken cancellationToken =
+            TestContext.Current.CancellationToken;
+
         HttpResponseMessage response =
             await client.PostAsJsonAsync(
                 "/api/v1/auth/login",
@@ -23,7 +26,8 @@ public sealed class AuthenticationApiTests(
                 {
                     email = fixture.UserEmail,
                     password = "wrong-password"
-                });
+                },
+                cancellationToken);
 
         Assert.Equal(
             HttpStatusCode.Unauthorized,
@@ -31,7 +35,8 @@ public sealed class AuthenticationApiTests(
 
         using JsonDocument document =
             JsonDocument.Parse(
-                await response.Content.ReadAsStringAsync());
+                await response.Content.ReadAsStringAsync(
+                    cancellationToken));
 
         Assert.True(
             document.RootElement.TryGetProperty(
@@ -47,8 +52,13 @@ public sealed class AuthenticationApiTests(
     {
         using HttpClient client = fixture.CreateClient();
 
+        CancellationToken cancellationToken =
+            TestContext.Current.CancellationToken;
+
         string accessToken =
-            await LoginAsync(client);
+            await LoginAsync(
+                client,
+                cancellationToken);
 
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue(
@@ -56,7 +66,9 @@ public sealed class AuthenticationApiTests(
                 accessToken);
 
         HttpResponseMessage response =
-            await client.GetAsync("/api/v1/auth/me");
+            await client.GetAsync(
+                "/api/v1/auth/me",
+                cancellationToken);
 
         Assert.Equal(
             HttpStatusCode.OK,
@@ -70,7 +82,8 @@ public sealed class AuthenticationApiTests(
 
         HttpResponseMessage response =
             await client.GetAsync(
-                $"/api/v1/projects/{Guid.NewGuid()}/reports/summary");
+                $"/api/v1/projects/{Guid.NewGuid()}/reports/summary",
+                TestContext.Current.CancellationToken);
 
         Assert.Equal(
             HttpStatusCode.Unauthorized,
@@ -82,8 +95,13 @@ public sealed class AuthenticationApiTests(
     {
         using HttpClient client = fixture.CreateClient();
 
+        CancellationToken cancellationToken =
+            TestContext.Current.CancellationToken;
+
         string accessToken =
-            await LoginAsync(client);
+            await LoginAsync(
+                client,
+                cancellationToken);
 
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue(
@@ -92,7 +110,8 @@ public sealed class AuthenticationApiTests(
 
         HttpResponseMessage response =
             await client.GetAsync(
-                $"/api/v1/projects/{Guid.NewGuid()}/reports/summary");
+                $"/api/v1/projects/{Guid.NewGuid()}/reports/summary",
+                cancellationToken);
 
         Assert.Equal(
             HttpStatusCode.Forbidden,
@@ -100,7 +119,8 @@ public sealed class AuthenticationApiTests(
     }
 
     private async Task<string> LoginAsync(
-        HttpClient client)
+        HttpClient client,
+        CancellationToken cancellationToken)
     {
         HttpResponseMessage response =
             await client.PostAsJsonAsync(
@@ -109,13 +129,15 @@ public sealed class AuthenticationApiTests(
                 {
                     email = fixture.UserEmail,
                     password = fixture.UserPassword
-                });
+                },
+                cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
         using JsonDocument document =
             JsonDocument.Parse(
-                await response.Content.ReadAsStringAsync());
+                await response.Content.ReadAsStringAsync(
+                    cancellationToken));
 
         return document.RootElement
             .GetProperty("accessToken")

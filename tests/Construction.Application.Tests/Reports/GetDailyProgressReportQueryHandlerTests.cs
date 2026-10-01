@@ -26,7 +26,10 @@ public sealed class GetDailyProgressReportQueryHandlerTests
             new CurrentUserFake(
                 true,
                 Guid.NewGuid(),
-                [Permissions.Reports.View]),
+                new HashSet<string>(StringComparer.Ordinal)
+                {
+                    Permissions.Reports.View
+                }),
             new ProjectAccessServiceFake(true),
             new FixedTimeProvider(
                 new DateTimeOffset(
@@ -42,7 +45,8 @@ public sealed class GetDailyProgressReportQueryHandlerTests
             new GetDailyProgressReportQuery(
                 project.Id,
                 null,
-                null));
+                null),
+            TestContext.Current.CancellationToken);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(
@@ -65,7 +69,10 @@ public sealed class GetDailyProgressReportQueryHandlerTests
             new CurrentUserFake(
                 true,
                 Guid.NewGuid(),
-                [Permissions.Reports.View]),
+                new HashSet<string>(StringComparer.Ordinal)
+                {
+                    Permissions.Reports.View
+                }),
             new ProjectAccessServiceFake(true),
             TimeProvider.System);
 
@@ -73,7 +80,8 @@ public sealed class GetDailyProgressReportQueryHandlerTests
             new GetDailyProgressReportQuery(
                 project.Id,
                 new DateOnly(2026, 2, 1),
-                new DateOnly(2026, 1, 1)));
+                new DateOnly(2026, 1, 1)),
+            TestContext.Current.CancellationToken);
 
         Assert.True(result.IsFailure);
         Assert.Equal(
@@ -93,7 +101,10 @@ public sealed class GetDailyProgressReportQueryHandlerTests
             new CurrentUserFake(
                 true,
                 Guid.NewGuid(),
-                [Permissions.Reports.View]),
+                new HashSet<string>(StringComparer.Ordinal)
+                {
+                    Permissions.Reports.View
+                }),
             new ProjectAccessServiceFake(false),
             TimeProvider.System);
 
@@ -101,7 +112,8 @@ public sealed class GetDailyProgressReportQueryHandlerTests
             new GetDailyProgressReportQuery(
                 project.Id,
                 null,
-                null));
+                null),
+            TestContext.Current.CancellationToken);
 
         Assert.True(result.IsFailure);
         Assert.Equal(

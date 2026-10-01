@@ -11,8 +11,7 @@ namespace Construction.IntegrationTests.Infrastructure;
 public sealed class IntegrationTestFixture : IAsyncLifetime
 {
     private readonly PostgreSqlContainer _postgres =
-        new PostgreSqlBuilder()
-            .WithImage("postgres:18-alpine")
+        new PostgreSqlBuilder("postgres:18-alpine")
             .WithDatabase("construction_tests")
             .WithUsername("construction")
             .WithPassword("construction")

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Construction.IntegrationTests.Reporting;
 
-[Collection(IntegrationTestCollection.Name)]
+[Collection(IntegrationTestGroup.Name)]
 public sealed class ProjectReportingReadServiceTests(
     IntegrationTestFixture fixture)
 {
@@ -64,7 +64,8 @@ public sealed class ProjectReportingReadServiceTests(
             dbContext.Projects.Add(project);
             dbContext.Activities.AddRange(first, second);
 
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(
+                TestContext.Current.CancellationToken);
 
             projectId = project.Id;
         }
@@ -78,7 +79,8 @@ public sealed class ProjectReportingReadServiceTests(
 
         var report = await reporting.GetActivitiesAsync(
             projectId,
-            new DateOnly(2026, 1, 10));
+            new DateOnly(2026, 1, 10),
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(2, report.Counts.Total);
         Assert.Equal(1, report.Counts.InProgress);
