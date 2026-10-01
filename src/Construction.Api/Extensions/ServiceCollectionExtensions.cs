@@ -28,6 +28,12 @@ using Construction.Application.WorkPackages.GetWorkPackage;
 using Construction.Application.WorkPackages.GetWorkPackages;
 using Construction.Application.WorkPackages.UpdateWorkPackage;
 using Construction.Application.Authentication.Login;
+using Construction.Application.Audit.GetAuditLogs;
+using Construction.Application.Notifications.GetNotificationPreferences;
+using Construction.Application.Notifications.GetNotifications;
+using Construction.Application.Notifications.MarkAllNotificationsRead;
+using Construction.Application.Notifications.MarkNotificationRead;
+using Construction.Application.Notifications.UpdateNotificationPreferences;
 using Construction.Application.Authentication.Logout;
 using Construction.Application.Authentication.RefreshToken;
 using Construction.Application.Companies.CreateCompany;
@@ -303,6 +309,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IssuePurchaseOrderCommandHandler>();
         services.AddScoped<ReceivePurchaseOrderCommandHandler>();
         services.AddScoped<ChangePurchaseOrderStatusCommandHandler>();
+
+        services.AddScoped<GetNotificationsQueryHandler>();
+        services.AddScoped<MarkNotificationReadCommandHandler>();
+        services.AddScoped<MarkAllNotificationsReadCommandHandler>();
+        services.AddScoped<GetNotificationPreferencesQueryHandler>();
+        services.AddScoped<UpdateNotificationPreferencesCommandHandler>();
+        services.AddScoped<GetAuditLogsQueryHandler>();
 
         services.AddCors(options =>
         {
