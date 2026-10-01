@@ -61,12 +61,14 @@ public static class Permissions
     {
         public const string View = "inspections.view";
         public const string Manage = "inspections.manage";
+        public const string Perform = "inspections.perform";
     }
 
     public static class Issues
     {
         public const string View = "issues.view";
         public const string Manage = "issues.manage";
+        public const string Verify = "issues.verify";
     }
 
     public static class Equipment
@@ -127,8 +129,10 @@ public static class Permissions
             Submittals.Review,
             Inspections.View,
             Inspections.Manage,
+            Inspections.Perform,
             Issues.View,
             Issues.Manage,
+            Issues.Verify,
             Equipment.View,
             Equipment.Manage,
             Procurement.View,
