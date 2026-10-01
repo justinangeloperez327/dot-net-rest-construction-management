@@ -3,10 +3,13 @@ using Construction.Application.Abstractions.Authentication;
 using Construction.Application.Abstractions.Authorization;
 using Construction.Application.Abstractions.Data;
 using Construction.Application.Abstractions.Files;
+using Construction.Application.Abstractions.Messaging;
 using Construction.Infrastructure.Authentication;
 using Construction.Infrastructure.Authorization;
+using Construction.Infrastructure.Email;
 using Construction.Infrastructure.Files;
 using Construction.Infrastructure.Identity;
+using Construction.Infrastructure.Notifications;
 using Construction.Infrastructure.Persistence;
 using Construction.Infrastructure.Persistence.Interceptors;
 using Construction.Infrastructure.Persistence.Repositories;
@@ -40,11 +43,15 @@ public static class DependencyInjection
         services.AddSingleton(fileStorageOptions);
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddScoped<AuditableEntityInterceptor>();
+        services.AddScoped<AuditLogInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
         {
-            AuditableEntityInterceptor auditInterceptor =
+            AuditableEntityInterceptor auditableEntityInterceptor =
                 serviceProvider.GetRequiredService<AuditableEntityInterceptor>();
+
+            AuditLogInterceptor auditLogInterceptor =
+                serviceProvider.GetRequiredService<AuditLogInterceptor>();
 
             options.UseNpgsql(
                 connectionString,
@@ -62,7 +69,9 @@ public static class DependencyInjection
                             .Name);
                 });
 
-            options.AddInterceptors(auditInterceptor);
+            options.AddInterceptors(
+                auditableEntityInterceptor,
+                auditLogInterceptor);
         });
 
         services
@@ -140,11 +149,15 @@ public static class DependencyInjection
         services.AddScoped<ISupplierRepository, SupplierRepository>();
         services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
         services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IAuditRepository, AuditRepository>();
 
         services.AddScoped<IUserDirectory, IdentityUserDirectory>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IProjectAccessService, ProjectAccessService>();
         services.AddScoped<IAuthenticationService, IdentityAuthenticationService>();
+        services.AddScoped<IEmailSender, LoggingEmailSender>();
+        services.AddScoped<INotificationSender, NotificationSender>();
 
         services.AddScoped<JwtTokenService>();
         services.AddScoped<IdentitySeeder>();
