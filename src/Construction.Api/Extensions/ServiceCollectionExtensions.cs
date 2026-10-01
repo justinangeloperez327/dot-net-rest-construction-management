@@ -3,6 +3,17 @@ using Construction.Api.Authentication;
 using Construction.Api.Configuration;
 using Construction.Api.ProblemDetails;
 using Construction.Application.Abstractions.Authentication;
+using Construction.Application.Attachments.DeleteAttachment;
+using Construction.Application.Attachments.DownloadAttachment;
+using Construction.Application.Attachments.GetAttachments;
+using Construction.Application.Attachments.UploadAttachment;
+using Construction.Application.Documents.AddDocumentRevision;
+using Construction.Application.Documents.ArchiveDocument;
+using Construction.Application.Documents.CreateDocument;
+using Construction.Application.Documents.DownloadDocumentRevision;
+using Construction.Application.Documents.GetDocument;
+using Construction.Application.Documents.GetDocuments;
+using Construction.Application.Documents.UpdateDocument;
 using Construction.Application.Activities.Assignments;
 using Construction.Application.Activities.ChangeActivityStatus;
 using Construction.Application.Activities.CreateActivity;
@@ -45,6 +56,7 @@ using Construction.Application.Projects.CreateProject;
 using Construction.Application.Projects.GetProject;
 using Construction.Application.Projects.GetProjects;
 using Construction.Application.Projects.UpdateProject;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
@@ -74,6 +86,23 @@ public static class ServiceCollectionExtensions
         services.AddApiProblemDetails();
         services.AddOpenApi("v1");
         services.AddHttpContextAccessor();
+
+        long maximumFileSizeBytes = long.TryParse(
+            configuration["FileStorage:MaximumFileSizeBytes"],
+            out long configuredMaximumFileSizeBytes)
+                ? configuredMaximumFileSizeBytes
+                : 104_857_600;
+
+        if (maximumFileSizeBytes <= 0)
+        {
+            throw new InvalidOperationException(
+                "FileStorage:MaximumFileSizeBytes must be greater than zero.");
+        }
+
+        services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = maximumFileSizeBytes;
+        });
 
         services.AddScoped<ICurrentUser, CurrentUser>();
 
@@ -130,6 +159,19 @@ public static class ServiceCollectionExtensions
         services.AddScoped<SubmitDailyProgressCommandHandler>();
         services.AddScoped<ReviewDailyProgressCommandHandler>();
         services.AddScoped<DeleteDailyProgressCommandHandler>();
+
+        services.AddScoped<CreateDocumentCommandHandler>();
+        services.AddScoped<GetDocumentQueryHandler>();
+        services.AddScoped<GetDocumentsQueryHandler>();
+        services.AddScoped<UpdateDocumentCommandHandler>();
+        services.AddScoped<ArchiveDocumentCommandHandler>();
+        services.AddScoped<AddDocumentRevisionCommandHandler>();
+        services.AddScoped<DownloadDocumentRevisionQueryHandler>();
+
+        services.AddScoped<UploadAttachmentCommandHandler>();
+        services.AddScoped<GetAttachmentsQueryHandler>();
+        services.AddScoped<DownloadAttachmentQueryHandler>();
+        services.AddScoped<DeleteAttachmentCommandHandler>();
 
         services.AddCors(options =>
         {
