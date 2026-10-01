@@ -14,100 +14,34 @@ public sealed class AttachmentTargetValidator(ApplicationDbContext dbContext)
         CancellationToken cancellationToken = default) =>
         targetType switch
         {
-            AttachmentTargetType.Project =>
-                dbContext.Projects
-                    .AsNoTracking()
-                    .AnyAsync(
-                        project =>
-                            project.Id == targetId
-                            && project.Id == projectId,
-                        cancellationToken),
-
-            AttachmentTargetType.WorkPackage =>
-                dbContext.WorkPackages
-                    .AsNoTracking()
-                    .AnyAsync(
-                        workPackage =>
-                            workPackage.Id == targetId
-                            && workPackage.ProjectId == projectId,
-                        cancellationToken),
-
-            AttachmentTargetType.Activity =>
-                dbContext.Activities
-                    .AsNoTracking()
-                    .AnyAsync(
-                        activity =>
-                            activity.Id == targetId
-                            && activity.ProjectId == projectId,
-                        cancellationToken),
-
-            AttachmentTargetType.DailyProgressReport =>
-                dbContext.DailyProgressReports
-                    .AsNoTracking()
-                    .AnyAsync(
-                        report =>
-                            report.Id == targetId
-                            && report.ProjectId == projectId,
-                        cancellationToken),
-
-            AttachmentTargetType.Rfi =>
-                dbContext.Rfis
-                    .AsNoTracking()
-                    .AnyAsync(
-                        rfi =>
-                            rfi.Id == targetId
-                            && rfi.ProjectId == projectId,
-                        cancellationToken),
-
-            AttachmentTargetType.Submittal =>
-                dbContext.Submittals
-                    .AsNoTracking()
-                    .AnyAsync(
-                        submittal =>
-                            submittal.Id == targetId
-                            && submittal.ProjectId == projectId,
-                        cancellationToken),
-
-            AttachmentTargetType.SubmittalRevision =>
-                dbContext.SubmittalRevisions
-                    .AsNoTracking()
-                    .AnyAsync(
-                        revision =>
-                            revision.Id == targetId
-                            && dbContext.Submittals.Any(submittal =>
-                                submittal.Id == revision.SubmittalId
-                                && submittal.ProjectId == projectId),
-                        cancellationToken),
-
-            AttachmentTargetType.Inspection =>
-                dbContext.Inspections
-                    .AsNoTracking()
-                    .AnyAsync(
-                        inspection =>
-                            inspection.Id == targetId
-                            && inspection.ProjectId == projectId,
-                        cancellationToken),
-
-            AttachmentTargetType.Issue =>
-                dbContext.Issues
-                    .AsNoTracking()
-                    .AnyAsync(
-                        issue =>
-                            issue.Id == targetId
-                            && issue.ProjectId == projectId,
-                        cancellationToken),
-
-            AttachmentTargetType.CorrectiveAction =>
-                dbContext.CorrectiveActions
-                    .AsNoTracking()
-                    .AnyAsync(
-                        action =>
-                            action.Id == targetId
-                            && dbContext.Issues.Any(issue =>
-                                issue.Id == action.IssueId
-                                && issue.ProjectId == projectId),
-                        cancellationToken),
-
+            AttachmentTargetType.Project => dbContext.Projects.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.Id == projectId, cancellationToken),
+            AttachmentTargetType.WorkPackage => dbContext.WorkPackages.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.Activity => dbContext.Activities.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.DailyProgressReport => dbContext.DailyProgressReports.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.Rfi => dbContext.Rfis.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.Submittal => dbContext.Submittals.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.SubmittalRevision => dbContext.SubmittalRevisions.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && dbContext.Submittals.Any(s => s.Id == x.SubmittalId && s.ProjectId == projectId), cancellationToken),
+            AttachmentTargetType.Inspection => dbContext.Inspections.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.Issue => dbContext.Issues.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.CorrectiveAction => dbContext.CorrectiveActions.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && dbContext.Issues.Any(i => i.Id == x.IssueId && i.ProjectId == projectId), cancellationToken),
+            AttachmentTargetType.Equipment => dbContext.Equipment.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.EquipmentMaintenance => dbContext.EquipmentMaintenanceRecords.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && dbContext.Equipment.Any(e => e.Id == x.EquipmentId && e.ProjectId == projectId), cancellationToken),
+            AttachmentTargetType.PurchaseRequest => dbContext.PurchaseRequests.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
+            AttachmentTargetType.PurchaseOrder => dbContext.PurchaseOrders.AsNoTracking()
+                .AnyAsync(x => x.Id == targetId && x.ProjectId == projectId, cancellationToken),
             _ => Task.FromResult(false)
         };
 }

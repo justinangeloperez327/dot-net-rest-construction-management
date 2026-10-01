@@ -4,13 +4,17 @@ using Construction.Domain.Attachments;
 using Construction.Domain.Companies;
 using Construction.Domain.DailyProgress;
 using Construction.Domain.Documents;
+using Construction.Domain.Equipment;
 using Construction.Domain.Inspections;
 using Construction.Domain.Issues;
 using Construction.Domain.Locations;
 using Construction.Domain.ProjectMembers;
 using Construction.Domain.Projects;
+using Construction.Domain.PurchaseOrders;
+using Construction.Domain.PurchaseRequests;
 using Construction.Domain.Rfis;
 using Construction.Domain.Submittals;
+using Construction.Domain.Suppliers;
 using Construction.Domain.WorkPackages;
 using Construction.Infrastructure.Authentication;
 using Construction.Infrastructure.Identity;
@@ -51,6 +55,14 @@ public sealed class ApplicationDbContext(
     public DbSet<Issue> Issues => Set<Issue>();
     public DbSet<CorrectiveAction> CorrectiveActions => Set<CorrectiveAction>();
     public DbSet<IssueHistoryEntry> IssueHistoryEntries => Set<IssueHistoryEntry>();
+    public DbSet<Equipment> Equipment => Set<Equipment>();
+    public DbSet<EquipmentAssignment> EquipmentAssignments => Set<EquipmentAssignment>();
+    public DbSet<EquipmentMaintenanceRecord> EquipmentMaintenanceRecords => Set<EquipmentMaintenanceRecord>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<PurchaseRequest> PurchaseRequests => Set<PurchaseRequest>();
+    public DbSet<PurchaseRequestItem> PurchaseRequestItems => Set<PurchaseRequestItem>();
+    public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
+    public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
