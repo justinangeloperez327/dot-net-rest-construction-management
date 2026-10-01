@@ -1,6 +1,7 @@
 using Construction.Application.Abstractions.Data;
 using Construction.Domain.Activities;
 using Construction.Domain.Companies;
+using Construction.Domain.DailyProgress;
 using Construction.Domain.Locations;
 using Construction.Domain.ProjectMembers;
 using Construction.Domain.Projects;
@@ -32,6 +33,14 @@ public sealed class ApplicationDbContext(
     public DbSet<ActivityAssignment> ActivityAssignments => Set<ActivityAssignment>();
 
     public DbSet<ActivityDependency> ActivityDependencies => Set<ActivityDependency>();
+
+    public DbSet<DailyProgressReport> DailyProgressReports => Set<DailyProgressReport>();
+
+    public DbSet<DailyProgressActivity> DailyProgressActivities => Set<DailyProgressActivity>();
+
+    public DbSet<DailyProgressManpower> DailyProgressManpower => Set<DailyProgressManpower>();
+
+    public DbSet<DailyProgressEquipment> DailyProgressEquipment => Set<DailyProgressEquipment>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
