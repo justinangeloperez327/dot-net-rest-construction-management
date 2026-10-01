@@ -154,15 +154,50 @@ Generic attachments can currently target:
 - Work Package
 - Activity
 - Daily Progress Report
+- RFI
+- Submittal
+- Submittal Revision
 
 Attachment targets are validated against the project before upload.
 
 File bytes are stored through the Application `IFileStorage` abstraction. Local development uses filesystem storage; cloud implementations can later replace it without changing Domain/Application code.
 
+### RFIs
+
+RFIs use project-unique numbers and a controlled workflow:
+
+- Draft
+- Open
+- Answered
+- Closed
+- Cancelled
+
+Each RFI records subject, question, optional due date, optional responsible project member, creator, current response, responder, comments, and immutable workflow history.
+
+Opening and general maintenance use `rfis.manage`. Answering requires the separate `rfis.respond` permission.
+
+RFI files use the shared attachment subsystem through the `Rfi` attachment target.
+
+### Submittals
+
+Submittals use project-unique numbers and support types including Shop Drawing, Material, Method Statement, Sample, Technical Data, Calculation, Procedure, and Other.
+
+The workflow is:
+
+- Draft
+- Submitted
+- Under Review
+- Approved / Approved With Comments / Rejected
+- Closed or revised and resubmitted
+
+Each submittal contains immutable revision records with sequential version numbers, user-facing revision codes, submission/review metadata, review due dates, reviewer remarks, comments, and immutable workflow history.
+
+Preparation/submission uses `submittals.manage`. Review decisions require `submittals.review`.
+
+Files may be attached to the overall Submittal or directly to a Submittal Revision using the shared attachment subsystem.
+
 ## Planned modules
 
-- RFIs
-- Submittals
 - Inspections
 - Issues
 - Equipment
