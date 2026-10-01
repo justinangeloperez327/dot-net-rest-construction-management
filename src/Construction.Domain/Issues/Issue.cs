@@ -244,30 +244,41 @@ public sealed class Issue : AuditableAggregateRoot<Guid>
             ?? throw new DomainException(
                 "Corrective action was not found.");
 
+        CorrectiveActionStatus currentStatus = action.Status;
+
         action.Update(
             description,
             responsibleUserId,
             dueDate);
 
-        switch (requestedStatus)
+        if (requestedStatus != currentStatus)
         {
-            case CorrectiveActionStatus.Pending:
-                break;
-            case CorrectiveActionStatus.InProgress:
-                action.Start();
-                break;
-            case CorrectiveActionStatus.Completed:
-                action.Complete(
-                    completionNotes ?? string.Empty,
-                    actorUserId,
-                    occurredAtUtc);
-                break;
-            case CorrectiveActionStatus.Cancelled:
-                action.Cancel();
-                break;
-            default:
-                throw new DomainException(
-                    "Corrective action status is invalid.");
+            switch (requestedStatus)
+            {
+                case CorrectiveActionStatus.InProgress
+                    when currentStatus == CorrectiveActionStatus.Pending:
+                    action.Start();
+                    break;
+
+                case CorrectiveActionStatus.Completed
+                    when currentStatus is CorrectiveActionStatus.Pending
+                        or CorrectiveActionStatus.InProgress:
+                    action.Complete(
+                        completionNotes ?? string.Empty,
+                        actorUserId,
+                        occurredAtUtc);
+                    break;
+
+                case CorrectiveActionStatus.Cancelled
+                    when currentStatus is CorrectiveActionStatus.Pending
+                        or CorrectiveActionStatus.InProgress:
+                    action.Cancel();
+                    break;
+
+                default:
+                    throw new DomainException(
+                        "The requested corrective action status transition is invalid.");
+            }
         }
 
         AddHistory(
