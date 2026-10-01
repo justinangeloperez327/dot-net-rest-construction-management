@@ -1,6 +1,7 @@
 using Construction.Application.Abstractions.Data;
 using Construction.Domain.Activities;
 using Construction.Domain.Attachments;
+using Construction.Domain.Audit;
 using Construction.Domain.Companies;
 using Construction.Domain.DailyProgress;
 using Construction.Domain.Documents;
@@ -8,6 +9,7 @@ using Construction.Domain.Equipment;
 using Construction.Domain.Inspections;
 using Construction.Domain.Issues;
 using Construction.Domain.Locations;
+using Construction.Domain.Notifications;
 using Construction.Domain.ProjectMembers;
 using Construction.Domain.Projects;
 using Construction.Domain.PurchaseOrders;
@@ -63,6 +65,9 @@ public sealed class ApplicationDbContext(
     public DbSet<PurchaseRequestItem> PurchaseRequestItems => Set<PurchaseRequestItem>();
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
     public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
