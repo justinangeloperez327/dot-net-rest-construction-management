@@ -66,9 +66,18 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
 
         if (snapshot is not null)
         {
+            IModelRuntimeInitializer modelRuntimeInitializer =
+                dbContext.GetService<IModelRuntimeInitializer>();
+
+            IModel initializedSnapshot =
+                modelRuntimeInitializer.Initialize(
+                    snapshot.Model,
+                    designTime: true,
+                    validationLogger: null);
+
             var differences = modelDiffer.GetDifferences(
-                snapshot.Model,
-                designTimeModel.Model);
+                initializedSnapshot.GetRelationalModel(),
+                designTimeModel.Model.GetRelationalModel());
 
             if (differences.Count > 0)
             {
