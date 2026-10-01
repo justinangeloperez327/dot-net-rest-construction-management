@@ -79,6 +79,35 @@ public sealed class AttachmentTargetValidator(ApplicationDbContext dbContext)
                                 && submittal.ProjectId == projectId),
                         cancellationToken),
 
+            AttachmentTargetType.Inspection =>
+                dbContext.Inspections
+                    .AsNoTracking()
+                    .AnyAsync(
+                        inspection =>
+                            inspection.Id == targetId
+                            && inspection.ProjectId == projectId,
+                        cancellationToken),
+
+            AttachmentTargetType.Issue =>
+                dbContext.Issues
+                    .AsNoTracking()
+                    .AnyAsync(
+                        issue =>
+                            issue.Id == targetId
+                            && issue.ProjectId == projectId,
+                        cancellationToken),
+
+            AttachmentTargetType.CorrectiveAction =>
+                dbContext.CorrectiveActions
+                    .AsNoTracking()
+                    .AnyAsync(
+                        action =>
+                            action.Id == targetId
+                            && dbContext.Issues.Any(issue =>
+                                issue.Id == action.IssueId
+                                && issue.ProjectId == projectId),
+                        cancellationToken),
+
             _ => Task.FromResult(false)
         };
 }

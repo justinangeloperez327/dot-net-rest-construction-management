@@ -4,6 +4,8 @@ using Construction.Domain.Attachments;
 using Construction.Domain.Companies;
 using Construction.Domain.DailyProgress;
 using Construction.Domain.Documents;
+using Construction.Domain.Inspections;
+using Construction.Domain.Issues;
 using Construction.Domain.Locations;
 using Construction.Domain.ProjectMembers;
 using Construction.Domain.Projects;
@@ -44,6 +46,11 @@ public sealed class ApplicationDbContext(
     public DbSet<SubmittalRevision> SubmittalRevisions => Set<SubmittalRevision>();
     public DbSet<SubmittalComment> SubmittalComments => Set<SubmittalComment>();
     public DbSet<SubmittalHistoryEntry> SubmittalHistoryEntries => Set<SubmittalHistoryEntry>();
+    public DbSet<Inspection> Inspections => Set<Inspection>();
+    public DbSet<InspectionHistoryEntry> InspectionHistoryEntries => Set<InspectionHistoryEntry>();
+    public DbSet<Issue> Issues => Set<Issue>();
+    public DbSet<CorrectiveAction> CorrectiveActions => Set<CorrectiveAction>();
+    public DbSet<IssueHistoryEntry> IssueHistoryEntries => Set<IssueHistoryEntry>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
