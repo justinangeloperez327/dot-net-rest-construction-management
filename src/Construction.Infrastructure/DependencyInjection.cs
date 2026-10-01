@@ -2,8 +2,10 @@ using System.Text;
 using Construction.Application.Abstractions.Authentication;
 using Construction.Application.Abstractions.Authorization;
 using Construction.Application.Abstractions.Data;
+using Construction.Application.Abstractions.Files;
 using Construction.Infrastructure.Authentication;
 using Construction.Infrastructure.Authorization;
+using Construction.Infrastructure.Files;
 using Construction.Infrastructure.Identity;
 using Construction.Infrastructure.Persistence;
 using Construction.Infrastructure.Persistence.Interceptors;
@@ -23,16 +25,20 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         string connectionString,
-        JwtOptions jwtOptions)
+        JwtOptions jwtOptions,
+        FileStorageOptions fileStorageOptions)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         ArgumentNullException.ThrowIfNull(jwtOptions);
+        ArgumentNullException.ThrowIfNull(fileStorageOptions);
 
         ValidateJwtOptions(jwtOptions);
 
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(jwtOptions);
+        services.AddSingleton(fileStorageOptions);
+        services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddScoped<AuditableEntityInterceptor>();
 
         services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
@@ -123,6 +129,9 @@ public static class DependencyInjection
         services.AddScoped<IActivityAssignmentRepository, ActivityAssignmentRepository>();
         services.AddScoped<IActivityDependencyRepository, ActivityDependencyRepository>();
         services.AddScoped<IDailyProgressRepository, DailyProgressRepository>();
+        services.AddScoped<IDocumentRepository, DocumentRepository>();
+        services.AddScoped<IAttachmentRepository, AttachmentRepository>();
+        services.AddScoped<IAttachmentTargetValidator, AttachmentTargetValidator>();
 
         services.AddScoped<IUserDirectory, IdentityUserDirectory>();
         services.AddScoped<IPermissionService, PermissionService>();

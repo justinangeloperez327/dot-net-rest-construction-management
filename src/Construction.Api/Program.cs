@@ -1,6 +1,7 @@
 using Construction.Api.Extensions;
 using Construction.Infrastructure;
 using Construction.Infrastructure.Authentication;
+using Construction.Infrastructure.Files;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,10 +27,31 @@ var jwtOptions = new JwtOptions
             : 7
 };
 
+string configuredFileStoragePath =
+    builder.Configuration["FileStorage:RootPath"]
+    ?? "data/uploads";
+
+string fileStoragePath = Path.IsPathRooted(configuredFileStoragePath)
+    ? configuredFileStoragePath
+    : Path.Combine(
+        builder.Environment.ContentRootPath,
+        configuredFileStoragePath);
+
+var fileStorageOptions = new FileStorageOptions
+{
+    RootPath = fileStoragePath,
+    MaximumFileSizeBytes = long.TryParse(
+        builder.Configuration["FileStorage:MaximumFileSizeBytes"],
+        out long maximumFileSizeBytes)
+            ? maximumFileSizeBytes
+            : 104_857_600
+};
+
 builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddInfrastructure(
     databaseConnectionString,
-    jwtOptions);
+    jwtOptions,
+    fileStorageOptions);
 
 var app = builder.Build();
 

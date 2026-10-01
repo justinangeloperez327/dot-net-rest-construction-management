@@ -10,6 +10,10 @@ services:
       ASPNETCORE_HTTP_PORTS: 8080
       ConnectionStrings__Database: Host=postgres;Port=5432;Database=construction;Username=construction;Password=construction
       Authentication__Jwt__SigningKey: ${JWT_SIGNING_KEY:-development-only-signing-key-change-before-use-2026}
+      FileStorage__RootPath: /app/data/uploads
+      FileStorage__MaximumFileSizeBytes: 104857600
+    volumes:
+      - construction-files:/app/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -32,3 +36,4 @@ services:
 
 volumes:
   construction-postgres:
+  construction-files:

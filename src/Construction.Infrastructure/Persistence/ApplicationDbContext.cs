@@ -1,7 +1,9 @@
 using Construction.Application.Abstractions.Data;
 using Construction.Domain.Activities;
+using Construction.Domain.Attachments;
 using Construction.Domain.Companies;
 using Construction.Domain.DailyProgress;
+using Construction.Domain.Documents;
 using Construction.Domain.Locations;
 using Construction.Domain.ProjectMembers;
 using Construction.Domain.Projects;
@@ -41,6 +43,12 @@ public sealed class ApplicationDbContext(
     public DbSet<DailyProgressManpower> DailyProgressManpower => Set<DailyProgressManpower>();
 
     public DbSet<DailyProgressEquipment> DailyProgressEquipment => Set<DailyProgressEquipment>();
+
+    public DbSet<ProjectDocument> Documents => Set<ProjectDocument>();
+
+    public DbSet<DocumentRevision> DocumentRevisions => Set<DocumentRevision>();
+
+    public DbSet<Attachment> Attachments => Set<Attachment>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
