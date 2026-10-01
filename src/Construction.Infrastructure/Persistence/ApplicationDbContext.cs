@@ -1,8 +1,10 @@
 using Construction.Application.Abstractions.Data;
+using Construction.Domain.Activities;
 using Construction.Domain.Companies;
 using Construction.Domain.Locations;
 using Construction.Domain.ProjectMembers;
 using Construction.Domain.Projects;
+using Construction.Domain.WorkPackages;
 using Construction.Infrastructure.Authentication;
 using Construction.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -22,6 +24,14 @@ public sealed class ApplicationDbContext(
     public DbSet<ProjectMember> ProjectMembers => Set<ProjectMember>();
 
     public DbSet<ProjectLocation> ProjectLocations => Set<ProjectLocation>();
+
+    public DbSet<WorkPackage> WorkPackages => Set<WorkPackage>();
+
+    public DbSet<Activity> Activities => Set<Activity>();
+
+    public DbSet<ActivityAssignment> ActivityAssignments => Set<ActivityAssignment>();
+
+    public DbSet<ActivityDependency> ActivityDependencies => Set<ActivityDependency>();
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
