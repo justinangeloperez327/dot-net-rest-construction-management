@@ -132,6 +132,8 @@ public static class DependencyInjection
         services.AddScoped<IDocumentRepository, DocumentRepository>();
         services.AddScoped<IAttachmentRepository, AttachmentRepository>();
         services.AddScoped<IAttachmentTargetValidator, AttachmentTargetValidator>();
+        services.AddScoped<IRfiRepository, RfiRepository>();
+        services.AddScoped<ISubmittalRepository, SubmittalRepository>();
 
         services.AddScoped<IUserDirectory, IdentityUserDirectory>();
         services.AddScoped<IPermissionService, PermissionService>();
