@@ -11,5 +11,9 @@ public enum AttachmentTargetType
     SubmittalRevision = 6,
     Inspection = 7,
     Issue = 8,
-    CorrectiveAction = 9
+    CorrectiveAction = 9,
+    Equipment = 10,
+    EquipmentMaintenance = 11,
+    PurchaseRequest = 12,
+    PurchaseOrder = 13
 }
