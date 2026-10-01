@@ -32,7 +32,7 @@ Concurrency tokens are configured per aggregate when the aggregate is introduced
 
 The repository contains a local `dotnet-ef` tool manifest pinned to the matching EF Core patch version.
 
-No empty initial migration is committed. The first migration should be created with the first persistent business aggregate so the migration represents an actual schema.
+Migrations are committed whenever a persistent module is introduced. Generated migration files are treated as generated code by analyzers and should not be hand-edited merely to satisfy style rules.
 
 ## Database initialization
 
