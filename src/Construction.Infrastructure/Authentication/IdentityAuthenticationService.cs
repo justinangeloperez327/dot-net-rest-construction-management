@@ -4,6 +4,7 @@ using Construction.Application.Abstractions.Authentication;
 using Construction.Application.Abstractions.Authorization;
 using Construction.Application.Common.Errors;
 using Construction.Application.Common.Results;
+using Construction.Domain.Audit;
 using Construction.Infrastructure.Identity;
 using Construction.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -33,13 +34,30 @@ public sealed class IdentityAuthenticationService(
 
         ApplicationUser? user = await userManager.FindByEmailAsync(email);
 
-        if (user is null || !user.IsActive)
+        if (user is null)
         {
+            return InvalidCredentials();
+        }
+
+        if (!user.IsActive)
+        {
+            await AddSecurityAuditAsync(
+                "LoginRejected",
+                user.Id,
+                "Login rejected for an inactive account.",
+                cancellationToken);
+
             return InvalidCredentials();
         }
 
         if (await userManager.IsLockedOutAsync(user))
         {
+            await AddSecurityAuditAsync(
+                "LoginBlocked",
+                user.Id,
+                "Login blocked because the account is locked.",
+                cancellationToken);
+
             return Result.Failure<AuthenticationTokens>(
                 ApplicationError.Unauthorized(
                     "Authentication.LockedOut",
@@ -52,6 +70,13 @@ public sealed class IdentityAuthenticationService(
         if (!validPassword)
         {
             await userManager.AccessFailedAsync(user);
+
+            await AddSecurityAuditAsync(
+                "LoginFailed",
+                user.Id,
+                "Login failed because the supplied credentials were invalid.",
+                cancellationToken);
+
             return InvalidCredentials();
         }
 
@@ -92,6 +117,20 @@ public sealed class IdentityAuthenticationService(
                     storedToken.UserId,
                     utcNow,
                     cancellationToken);
+
+                await AddSecurityAuditAsync(
+                    "RefreshTokenReuseDetected",
+                    storedToken.UserId,
+                    "A previously replaced refresh token was presented. Active sessions were revoked.",
+                    cancellationToken);
+            }
+            else
+            {
+                await AddSecurityAuditAsync(
+                    "RefreshTokenRejected",
+                    storedToken.UserId,
+                    "A revoked refresh token was presented.",
+                    cancellationToken);
             }
 
             return InvalidRefreshToken();
@@ -99,6 +138,12 @@ public sealed class IdentityAuthenticationService(
 
         if (!storedToken.IsActive(utcNow))
         {
+            await AddSecurityAuditAsync(
+                "RefreshTokenRejected",
+                storedToken.UserId,
+                "An expired refresh token was presented.",
+                cancellationToken);
+
             return InvalidRefreshToken();
         }
 
@@ -127,6 +172,13 @@ public sealed class IdentityAuthenticationService(
                 authorizationContext.Roles,
                 authorizationContext.Permissions);
 
+        dbContext.AuditLogs.Add(
+            AuditLog.CreateSecurity(
+                "TokenRefreshed",
+                storedToken.UserId,
+                null,
+                utcNow));
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success(new AuthenticationTokens(
@@ -154,7 +206,17 @@ public sealed class IdentityAuthenticationService(
         if (storedToken is not null
             && storedToken.RevokedAtUtc is null)
         {
-            storedToken.Revoke(timeProvider.GetUtcNow());
+            DateTimeOffset utcNow = timeProvider.GetUtcNow();
+
+            storedToken.Revoke(utcNow);
+
+            dbContext.AuditLogs.Add(
+                AuditLog.CreateSecurity(
+                    "Logout",
+                    storedToken.UserId,
+                    null,
+                    utcNow));
+
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
@@ -186,6 +248,13 @@ public sealed class IdentityAuthenticationService(
             refreshTokenHash,
             utcNow,
             utcNow.AddDays(jwtOptions.RefreshTokenDays)));
+
+        dbContext.AuditLogs.Add(
+            AuditLog.CreateSecurity(
+                "LoginSucceeded",
+                user.Id,
+                null,
+                utcNow));
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -228,6 +297,22 @@ public sealed class IdentityAuthenticationService(
         {
             token.Revoke(revokedAtUtc);
         }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task AddSecurityAuditAsync(
+        string action,
+        Guid? userId,
+        string? description,
+        CancellationToken cancellationToken)
+    {
+        dbContext.AuditLogs.Add(
+            AuditLog.CreateSecurity(
+                action,
+                userId,
+                description,
+                timeProvider.GetUtcNow()));
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }
