@@ -322,8 +322,51 @@ PO editing and receipt recording use `purchase-orders.manage`; formal issuance r
 
 Purchase Request and Purchase Order files use the shared attachment subsystem.
 
+### Notifications
+
+Authenticated users have a personal in-app notification inbox with read/unread state and paginated retrieval.
+
+Notification records can carry:
+
+- notification type;
+- subject and message;
+- optional project context;
+- optional related entity type and identifier;
+- read timestamp.
+
+Each user has notification preferences for in-app and email delivery. Defaults are in-app enabled and email disabled.
+
+Application code sends notifications through `INotificationSender`. The current infrastructure implementation persists in-app notifications and routes email-enabled notifications through `IEmailSender`.
+
+The initial email adapter is a safe logging adapter rather than a hard-coded SMTP/provider dependency. A production SMTP, Microsoft Graph, SendGrid, SES, or other provider can replace it without changing Application code.
+
+### Audit
+
+A centralized immutable audit log now records Domain entity create/update/delete operations automatically at EF Core SaveChanges boundaries.
+
+Entity audit records contain:
+
+- action;
+- actor user when authenticated;
+- project identifier when directly available;
+- entity type and identifier;
+- sanitized changed-property values;
+- timestamp.
+
+Notification and audit entities are excluded from automatic auditing to prevent recursive or low-value audit noise.
+
+Authentication also emits explicit security audit events for:
+
+- successful login;
+- failed login for a known account;
+- locked/inactive login rejection;
+- token refresh;
+- rejected/reused refresh tokens;
+- logout;
+- refresh-token reuse detection with active-session revocation.
+
+Project-scoped audit access requires `audit.view` plus normal project access. Unscoped/global audit additionally requires `projects.access-all`.
+
 ## Planned modules
 
-- Notifications
-- Audit
 - Reporting
