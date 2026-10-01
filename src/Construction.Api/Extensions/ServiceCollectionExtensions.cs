@@ -56,6 +56,24 @@ using Construction.Application.Projects.CreateProject;
 using Construction.Application.Projects.GetProject;
 using Construction.Application.Projects.GetProjects;
 using Construction.Application.Projects.UpdateProject;
+using Construction.Application.Rfis.AddRfiComment;
+using Construction.Application.Rfis.ChangeRfiStatus;
+using Construction.Application.Rfis.CreateRfi;
+using Construction.Application.Rfis.GetRfi;
+using Construction.Application.Rfis.GetRfis;
+using Construction.Application.Rfis.OpenRfi;
+using Construction.Application.Rfis.RespondRfi;
+using Construction.Application.Rfis.UpdateRfi;
+using Construction.Application.Submittals.AddSubmittalComment;
+using Construction.Application.Submittals.AddSubmittalRevision;
+using Construction.Application.Submittals.ChangeSubmittalStatus;
+using Construction.Application.Submittals.CreateSubmittal;
+using Construction.Application.Submittals.GetSubmittal;
+using Construction.Application.Submittals.GetSubmittals;
+using Construction.Application.Submittals.ReviewSubmittal;
+using Construction.Application.Submittals.StartSubmittalReview;
+using Construction.Application.Submittals.SubmitSubmittal;
+using Construction.Application.Submittals.UpdateSubmittal;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
@@ -172,6 +190,26 @@ public static class ServiceCollectionExtensions
         services.AddScoped<GetAttachmentsQueryHandler>();
         services.AddScoped<DownloadAttachmentQueryHandler>();
         services.AddScoped<DeleteAttachmentCommandHandler>();
+
+        services.AddScoped<CreateRfiCommandHandler>();
+        services.AddScoped<GetRfiQueryHandler>();
+        services.AddScoped<GetRfisQueryHandler>();
+        services.AddScoped<UpdateRfiCommandHandler>();
+        services.AddScoped<OpenRfiCommandHandler>();
+        services.AddScoped<RespondRfiCommandHandler>();
+        services.AddScoped<ChangeRfiStatusCommandHandler>();
+        services.AddScoped<AddRfiCommentCommandHandler>();
+
+        services.AddScoped<CreateSubmittalCommandHandler>();
+        services.AddScoped<GetSubmittalQueryHandler>();
+        services.AddScoped<GetSubmittalsQueryHandler>();
+        services.AddScoped<UpdateSubmittalCommandHandler>();
+        services.AddScoped<AddSubmittalRevisionCommandHandler>();
+        services.AddScoped<SubmitSubmittalCommandHandler>();
+        services.AddScoped<StartSubmittalReviewCommandHandler>();
+        services.AddScoped<ReviewSubmittalCommandHandler>();
+        services.AddScoped<ChangeSubmittalStatusCommandHandler>();
+        services.AddScoped<AddSubmittalCommentCommandHandler>();
 
         services.AddCors(options =>
         {
