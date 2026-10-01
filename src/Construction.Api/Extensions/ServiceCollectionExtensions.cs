@@ -3,6 +3,19 @@ using Construction.Api.Authentication;
 using Construction.Api.Configuration;
 using Construction.Api.ProblemDetails;
 using Construction.Application.Abstractions.Authentication;
+using Construction.Application.Activities.Assignments;
+using Construction.Application.Activities.ChangeActivityStatus;
+using Construction.Application.Activities.CreateActivity;
+using Construction.Application.Activities.Dependencies;
+using Construction.Application.Activities.GetActivities;
+using Construction.Application.Activities.GetActivity;
+using Construction.Application.Activities.UpdateActivity;
+using Construction.Application.Activities.UpdateActivityProgress;
+using Construction.Application.WorkPackages.ChangeWorkPackageStatus;
+using Construction.Application.WorkPackages.CreateWorkPackage;
+using Construction.Application.WorkPackages.GetWorkPackage;
+using Construction.Application.WorkPackages.GetWorkPackages;
+using Construction.Application.WorkPackages.UpdateWorkPackage;
 using Construction.Application.Authentication.Login;
 using Construction.Application.Authentication.Logout;
 using Construction.Application.Authentication.RefreshToken;
@@ -77,6 +90,25 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateLocationCommandHandler>();
         services.AddScoped<GetLocationsQueryHandler>();
         services.AddScoped<UpdateLocationCommandHandler>();
+
+        services.AddScoped<CreateWorkPackageCommandHandler>();
+        services.AddScoped<GetWorkPackageQueryHandler>();
+        services.AddScoped<GetWorkPackagesQueryHandler>();
+        services.AddScoped<UpdateWorkPackageCommandHandler>();
+        services.AddScoped<ChangeWorkPackageStatusCommandHandler>();
+
+        services.AddScoped<CreateActivityCommandHandler>();
+        services.AddScoped<GetActivityQueryHandler>();
+        services.AddScoped<GetActivitiesQueryHandler>();
+        services.AddScoped<UpdateActivityCommandHandler>();
+        services.AddScoped<UpdateActivityProgressCommandHandler>();
+        services.AddScoped<ChangeActivityStatusCommandHandler>();
+        services.AddScoped<AddActivityAssignmentCommandHandler>();
+        services.AddScoped<GetActivityAssignmentsQueryHandler>();
+        services.AddScoped<RemoveActivityAssignmentCommandHandler>();
+        services.AddScoped<AddActivityDependencyCommandHandler>();
+        services.AddScoped<GetActivityDependenciesQueryHandler>();
+        services.AddScoped<RemoveActivityDependencyCommandHandler>();
 
         services.AddCors(options =>
         {
