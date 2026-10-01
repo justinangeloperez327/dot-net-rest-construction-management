@@ -2,6 +2,10 @@ using Construction.Infrastructure.Identity;
 using Construction.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
@@ -46,10 +50,43 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
         await using AsyncServiceScope scope =
             Factory.Services.CreateAsyncScope();
 
+        ApplicationDbContext dbContext =
+            scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        IMigrationsAssembly migrationsAssembly =
+            dbContext.GetService<IMigrationsAssembly>();
+
+        IDesignTimeModel designTimeModel =
+            dbContext.GetService<IDesignTimeModel>();
+
+        IMigrationsModelDiffer modelDiffer =
+            dbContext.GetService<IMigrationsModelDiffer>();
+
+        var snapshot = migrationsAssembly.ModelSnapshot;
+
+        if (snapshot is not null)
+        {
+            var differences = modelDiffer.GetDifferences(
+                snapshot.Model.GetRelationalModel(),
+                designTimeModel.Model.GetRelationalModel());
+
+            if (differences.Count > 0)
+            {
+                string differenceSummary = string.Join(
+                    ", ",
+                    differences.Select(operation =>
+                        operation.GetType().Name));
+
+                throw new InvalidOperationException(
+                    $"Runtime EF model differs from the migration snapshot: {differenceSummary}");
+            }
+        }
+
         DatabaseInitializer initializer =
             scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
 
-        await initializer.InitializeAsync();
+        await initializer.InitializeAsync(
+            TestContext.Current.CancellationToken);
 
         UserManager<ApplicationUser> userManager =
             scope.ServiceProvider
