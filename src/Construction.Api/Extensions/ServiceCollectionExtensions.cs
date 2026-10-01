@@ -24,6 +24,16 @@ using Construction.Application.Companies.DeactivateCompany;
 using Construction.Application.Companies.GetCompanies;
 using Construction.Application.Companies.GetCompany;
 using Construction.Application.Companies.UpdateCompany;
+using Construction.Application.DailyProgress.CreateDailyProgress;
+using Construction.Application.DailyProgress.DeleteDailyProgress;
+using Construction.Application.DailyProgress.GetDailyProgress;
+using Construction.Application.DailyProgress.GetDailyProgressReports;
+using Construction.Application.DailyProgress.ReviewDailyProgress;
+using Construction.Application.DailyProgress.SetDailyProgressActivities;
+using Construction.Application.DailyProgress.SetDailyProgressEquipment;
+using Construction.Application.DailyProgress.SetDailyProgressManpower;
+using Construction.Application.DailyProgress.SubmitDailyProgress;
+using Construction.Application.DailyProgress.UpdateDailyProgress;
 using Construction.Application.Locations.CreateLocation;
 using Construction.Application.Locations.GetLocations;
 using Construction.Application.Locations.UpdateLocation;
@@ -109,6 +119,17 @@ public static class ServiceCollectionExtensions
         services.AddScoped<AddActivityDependencyCommandHandler>();
         services.AddScoped<GetActivityDependenciesQueryHandler>();
         services.AddScoped<RemoveActivityDependencyCommandHandler>();
+
+        services.AddScoped<CreateDailyProgressCommandHandler>();
+        services.AddScoped<GetDailyProgressQueryHandler>();
+        services.AddScoped<GetDailyProgressReportsQueryHandler>();
+        services.AddScoped<UpdateDailyProgressCommandHandler>();
+        services.AddScoped<SetDailyProgressActivitiesCommandHandler>();
+        services.AddScoped<SetDailyProgressManpowerCommandHandler>();
+        services.AddScoped<SetDailyProgressEquipmentCommandHandler>();
+        services.AddScoped<SubmitDailyProgressCommandHandler>();
+        services.AddScoped<ReviewDailyProgressCommandHandler>();
+        services.AddScoped<DeleteDailyProgressCommandHandler>();
 
         services.AddCors(options =>
         {
