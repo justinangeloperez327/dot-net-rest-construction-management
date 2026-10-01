@@ -122,6 +122,7 @@ public static class DependencyInjection
         services.AddScoped<IActivityRepository, ActivityRepository>();
         services.AddScoped<IActivityAssignmentRepository, ActivityAssignmentRepository>();
         services.AddScoped<IActivityDependencyRepository, ActivityDependencyRepository>();
+        services.AddScoped<IDailyProgressRepository, DailyProgressRepository>();
 
         services.AddScoped<IUserDirectory, IdentityUserDirectory>();
         services.AddScoped<IPermissionService, PermissionService>();
