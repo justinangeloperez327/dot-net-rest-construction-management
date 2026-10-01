@@ -15,6 +15,12 @@ public sealed class NotificationSender(
     ILogger<NotificationSender> logger)
     : INotificationSender
 {
+    private static readonly Action<ILogger, Guid, Exception?>
+        RecipientUnavailable = LoggerMessage.Define<Guid>(
+            LogLevel.Warning,
+            new EventId(1, nameof(RecipientUnavailable)),
+            "Notification recipient {RecipientUserId} is unavailable.");
+
     public async Task SendAsync(
         ApplicationNotification notification,
         CancellationToken cancellationToken = default)
@@ -26,9 +32,11 @@ public sealed class NotificationSender(
 
         if (user is null || !user.IsActive)
         {
-            logger.LogWarning(
-                "Notification recipient {RecipientUserId} is unavailable.",
-                notification.RecipientUserId);
+            RecipientUnavailable(
+                logger,
+                notification.RecipientUserId,
+                null);
+
             return;
         }
 
