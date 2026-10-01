@@ -67,8 +67,8 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
         if (snapshot is not null)
         {
             var differences = modelDiffer.GetDifferences(
-                snapshot.Model.GetRelationalModel(),
-                designTimeModel.Model.GetRelationalModel());
+                snapshot.Model,
+                designTimeModel.Model);
 
             if (differences.Count > 0)
             {
