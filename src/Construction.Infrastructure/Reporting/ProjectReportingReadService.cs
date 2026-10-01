@@ -9,6 +9,7 @@ using Construction.Domain.PurchaseOrders;
 using Construction.Domain.PurchaseRequests;
 using Construction.Domain.Rfis;
 using Construction.Domain.Submittals;
+using Construction.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Construction.Infrastructure.Reporting;
