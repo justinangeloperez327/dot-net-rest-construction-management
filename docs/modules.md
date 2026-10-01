@@ -107,9 +107,34 @@ Activities support the standard scheduling dependency relationships:
 
 Dependencies can include positive or negative lag days. Self-dependencies, duplicate dependencies, cross-project dependencies, and dependency cycles are rejected.
 
+### Daily Progress
+
+Daily progress reports are project/date records with a controlled workflow:
+
+- Draft
+- Submitted
+- Approved
+- Rejected
+
+A project can have only one daily progress report for a given date.
+
+Each report can record:
+
+- weather and temperature;
+- work summary and remarks;
+- activity progress snapshots and completed quantities;
+- manpower by trade and optional company;
+- equipment utilization and idle hours;
+- creator, submitter, reviewer, timestamps, and rejection reason.
+
+Submitted reports are read-only while under review. Rejected reports can be revised and automatically return to Draft. Approved reports are immutable.
+
+Daily progress preparation uses `daily-progress.manage`; approval/rejection requires the separate `daily-progress.approve` permission. Both remain subject to project access rules.
+
+File attachments will integrate with the document/attachment model in Group 11 rather than introducing a temporary storage model here.
+
 ## Planned modules
 
-- Daily Progress
 - Documents and Attachments
 - RFIs
 - Submittals
