@@ -1,3 +1,4 @@
+using System.Globalization;
 using Construction.Infrastructure.Identity;
 using Construction.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -147,8 +148,8 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
                 + $"newType={column.ColumnType ?? "<null>"}, "
                 + $"oldNullable={column.OldColumn.IsNullable}, "
                 + $"newNullable={column.IsNullable}, "
-                + $"oldMaxLength={column.OldColumn.MaxLength?.ToString() ?? "<null>"}, "
-                + $"newMaxLength={column.MaxLength?.ToString() ?? "<null>"}",
+                + $"oldMaxLength={column.OldColumn.MaxLength?.ToString(CultureInfo.InvariantCulture) ?? "<null>"}, "
+                + $"newMaxLength={column.MaxLength?.ToString(CultureInfo.InvariantCulture) ?? "<null>"}",
             _ => operation.GetType().Name
         };
 
