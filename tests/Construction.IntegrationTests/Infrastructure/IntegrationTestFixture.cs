@@ -3,6 +3,10 @@ using Construction.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
@@ -52,8 +56,42 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
 
         if (dbContext.Database.HasPendingModelChanges())
         {
+            IMigrationsAssembly migrationsAssembly =
+                dbContext.GetService<IMigrationsAssembly>();
+
+            IDesignTimeModel designTimeModel =
+                dbContext.GetService<IDesignTimeModel>();
+
+            IMigrationsModelDiffer modelDiffer =
+                dbContext.GetService<IMigrationsModelDiffer>();
+
+            ModelSnapshot? snapshot =
+                migrationsAssembly.ModelSnapshot;
+
+            string detail = "Unknown model difference.";
+
+            if (snapshot is not null)
+            {
+                IModelRuntimeInitializer runtimeInitializer =
+                    dbContext.GetService<IModelRuntimeInitializer>();
+
+                IModel initializedSnapshot =
+                    runtimeInitializer.Initialize(
+                        snapshot.Model,
+                        designTime: true,
+                        validationLogger: null);
+
+                var differences = modelDiffer.GetDifferences(
+                    initializedSnapshot.GetRelationalModel(),
+                    designTimeModel.Model.GetRelationalModel());
+
+                detail = string.Join(
+                    " | ",
+                    differences.Select(DescribeDifference));
+            }
+
             throw new InvalidOperationException(
-                "Runtime EF model differs from the migration snapshot.");
+                $"Runtime EF model differs from the migration snapshot: {detail}");
         }
 
         DatabaseInitializer initializer =
@@ -98,6 +136,21 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
             }
         }
     }
+
+    private static string DescribeDifference(
+        MigrationOperation operation) =>
+        operation switch
+        {
+            AlterColumnOperation column =>
+                $"AlterColumn {column.Table}.{column.Name}: "
+                + $"oldType={column.OldColumn.ColumnType ?? "<null>"}, "
+                + $"newType={column.ColumnType ?? "<null>"}, "
+                + $"oldNullable={column.OldColumn.IsNullable}, "
+                + $"newNullable={column.IsNullable}, "
+                + $"oldMaxLength={column.OldColumn.MaxLength?.ToString() ?? "<null>"}, "
+                + $"newMaxLength={column.MaxLength?.ToString() ?? "<null>"}",
+            _ => operation.GetType().Name
+        };
 
     public HttpClient CreateClient() =>
         Factory.CreateClient(
