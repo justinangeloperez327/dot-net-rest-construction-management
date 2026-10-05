@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0.401-resolute AS restore
 WORKDIR /src
 
-COPY global.json Directory.Build.props Directory.Packages.props ./
+COPY global.json Directory.Build.props Directory.Packages.props .editorconfig ./
 COPY src/Construction.Domain/Construction.Domain.csproj src/Construction.Domain/
 COPY src/Construction.Application/Construction.Application.csproj src/Construction.Application/
 COPY src/Construction.Infrastructure/Construction.Infrastructure.csproj src/Construction.Infrastructure/
