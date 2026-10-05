@@ -6,6 +6,8 @@ public sealed class ApiOptions
 
     public string[] AllowedOrigins { get; init; } = [];
 
+    public string[] TrustedProxies { get; init; } = [];
+
     public int RateLimitPermitLimit { get; init; } = 120;
 
     public int RateLimitWindowSeconds { get; init; } = 60;
