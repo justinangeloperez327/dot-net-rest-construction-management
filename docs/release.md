@@ -6,7 +6,7 @@ The repository uses stable semantic versions in the form:
 vMAJOR.MINOR.PATCH
 ```
 
-The current release baseline is `0.1.0`.
+The current published release is `v0.1.0`.
 
 ## Required quality gates
 
@@ -107,3 +107,15 @@ For a future release:
 5. let the release workflow publish the image and GitHub Release.
 
 Do not reuse or move an existing release tag.
+
+
+## v0.1.0 status
+
+The initial `v0.1.0` release pipeline completed successfully on October 5, 2026:
+
+- tagged source verification passed;
+- formatting/build/tests passed;
+- package vulnerability scan passed;
+- the GHCR image was published with semver, latest, and source-SHA tags;
+- SBOM/provenance metadata was emitted by the Docker build;
+- the GitHub Release was created with production deployment templates attached.
