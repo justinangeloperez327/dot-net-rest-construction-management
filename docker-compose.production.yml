@@ -29,6 +29,7 @@ services:
       ConnectionStrings__Database: Host=postgres;Port=5432;Database=${POSTGRES_DB:-construction};Username=${POSTGRES_USER:-construction};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       Authentication__Jwt__SigningKey: ${JWT_SIGNING_KEY:?JWT_SIGNING_KEY is required}
       Api__AllowedOrigins__0: ${ALLOWED_ORIGIN:?ALLOWED_ORIGIN is required}
+      Api__TrustedProxies__0: ${TRUSTED_PROXY_IP:-}
       AllowedHosts: ${ALLOWED_HOSTS:?ALLOWED_HOSTS is required}
       FileStorage__RootPath: /app/data/uploads
       FileStorage__MaximumFileSizeBytes: ${MAXIMUM_FILE_SIZE_BYTES:-104857600}
