@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Construction.Api.Authentication;
@@ -131,6 +132,7 @@ using Construction.Application.Submittals.StartSubmittalReview;
 using Construction.Application.Submittals.SubmitSubmittal;
 using Construction.Application.Submittals.UpdateSubmittal;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
@@ -160,6 +162,19 @@ public static class ServiceCollectionExtensions
         services.AddApiProblemDetails();
         services.AddOpenApi("v1");
         services.AddHttpContextAccessor();
+
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor
+                | ForwardedHeaders.XForwardedProto;
+            options.ForwardLimit = 1;
+
+            foreach (string proxy in apiOptions.TrustedProxies)
+            {
+                options.KnownProxies.Add(IPAddress.Parse(proxy));
+            }
+        });
 
         long maximumFileSizeBytes = long.TryParse(
             configuration["FileStorage:MaximumFileSizeBytes"],
@@ -426,6 +441,15 @@ public static class ServiceCollectionExtensions
 
     private static void ValidateApiOptions(ApiOptions options)
     {
+        foreach (string proxy in options.TrustedProxies)
+        {
+            if (!IPAddress.TryParse(proxy, out _))
+            {
+                throw new InvalidOperationException(
+                    "Api:TrustedProxies must contain valid IP addresses.");
+            }
+        }
+
         if (options.RateLimitPermitLimit <= 0)
         {
             throw new InvalidOperationException(
