@@ -4,9 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-test:
@@ -22,6 +27,13 @@ jobs:
 
       - name: Restore
         run: dotnet restore Construction.sln
+
+      - name: Verify formatting
+        run: >
+          dotnet format Construction.sln
+          --verify-no-changes
+          --no-restore
+          --verbosity minimal
 
       - name: Build
         run: dotnet build Construction.sln --configuration Release --no-restore
