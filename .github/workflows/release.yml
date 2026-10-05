@@ -4,13 +4,19 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing stable release tag to publish or retry, for example v0.1.0
+        required: true
+        type: string
 
 permissions:
   contents: write
   packages: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
   cancel-in-progress: false
 
 env:
@@ -24,9 +30,15 @@ jobs:
 
     outputs:
       version: ${{ steps.version.outputs.version }}
+      release_tag: ${{ steps.version.outputs.release_tag }}
+      source_sha: ${{ steps.version.outputs.source_sha }}
+      short_sha: ${{ steps.version.outputs.short_sha }}
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          fetch-depth: 0
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -36,12 +48,23 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          set -euo pipefail
+
+          release_tag="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
+
+          if [[ ! "$release_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Release tag must use stable semantic versioning: vX.Y.Z"
             exit 1
           fi
 
-          version="${GITHUB_REF_NAME#v}"
+          git fetch --tags origin
+
+          if ! git rev-parse --verify "refs/tags/$release_tag" > /dev/null 2>&1; then
+            echo "Release tag $release_tag does not exist."
+            exit 1
+          fi
+
+          version="${release_tag#v}"
           repository_version="$(
             sed -n 's:.*<VersionPrefix>\(.*\)</VersionPrefix>.*:\1:p'               Directory.Build.props
           )"
@@ -51,7 +74,18 @@ jobs:
             exit 1
           fi
 
+          source_sha="$(git rev-list -n 1 "$release_tag")"
+          checked_out_sha="$(git rev-parse HEAD)"
+
+          if [ "$source_sha" != "$checked_out_sha" ]; then
+            echo "Checked out commit does not match tag $release_tag."
+            exit 1
+          fi
+
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
+          echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${source_sha:0:12}" >> "$GITHUB_OUTPUT"
 
       - name: Restore
         run: dotnet restore Construction.sln
@@ -84,6 +118,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.verify.outputs.release_tag }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -101,16 +137,17 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha,prefix=sha-
+            type=semver,pattern={{version}},value=${{ needs.verify.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.verify.outputs.version }}
+            type=semver,pattern={{major}},value=${{ needs.verify.outputs.version }}
+            type=raw,value=sha-${{ needs.verify.outputs.short_sha }}
           flavor: |
             latest=true
           labels: |
             org.opencontainers.image.title=Construction Management REST API
             org.opencontainers.image.description=.NET 10 construction management REST backend
             org.opencontainers.image.version=${{ needs.verify.outputs.version }}
+            org.opencontainers.image.revision=${{ needs.verify.outputs.source_sha }}
 
       - name: Build and publish immutable image
         id: build
@@ -124,7 +161,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             VERSION=${{ needs.verify.outputs.version }}
-            SOURCE_REVISION=${{ github.sha }}
+            SOURCE_REVISION=${{ needs.verify.outputs.source_sha }}
           provenance: mode=max
           sbom: true
 
@@ -146,13 +183,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.verify.outputs.release_tag }}
 
-      - name: Create GitHub release
+      - name: Create or refresh GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.verify.outputs.release_tag }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload               "$GITHUB_REF_NAME"               docker-compose.production.yml               .env.example               --clobber
+          set -euo pipefail
+
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            gh release upload               "$RELEASE_TAG"               docker-compose.production.yml               .env.example               --clobber
           else
-            gh release create               "$GITHUB_REF_NAME"               docker-compose.production.yml               .env.example               --verify-tag               --generate-notes               --title "Construction Management REST API $GITHUB_REF_NAME"
+            gh release create               "$RELEASE_TAG"               docker-compose.production.yml               .env.example               --verify-tag               --generate-notes               --title "Construction Management REST API $RELEASE_TAG"
           fi

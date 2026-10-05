@@ -52,11 +52,13 @@ git tag -a v0.1.0 -m "Construction Management REST API v0.1.0"
 git push origin v0.1.0
 ```
 
-Pushing the tag starts `.github/workflows/release.yml`.
+A normal developer/user tag push starts `.github/workflows/release.yml`.
+
+If a tag was created by another GitHub Actions workflow using `GITHUB_TOKEN`, GitHub intentionally suppresses recursive workflow execution. In that case, run the Release workflow manually and provide the existing tag. The workflow always checks out and verifies the tag commit before publishing.
 
 ## Release workflow
 
-The release workflow independently re-verifies:
+The release workflow supports both tag-push execution and manual retry for an existing tag. It independently re-verifies:
 
 - semantic release tag;
 - repository version;
