@@ -134,6 +134,16 @@ The Compose PostgreSQL service uses a persistent named volume:
 construction-postgres
 ```
 
+Because the project uses PostgreSQL 18, that volume is mounted at:
+
+```text
+/var/lib/postgresql
+```
+
+PostgreSQL 18 changed the official image's volume layout from the PostgreSQL 17-and-earlier `/var/lib/postgresql/data` path to the versioned `PGDATA=/var/lib/postgresql/18/docker` layout under `/var/lib/postgresql`.
+
+If a developer created a disposable local volume using the earlier repository Compose file, remove/recreate it with `docker compose down --volumes`. For any non-disposable database volume, migrate/backup the data instead of deleting it.
+
 For managed production PostgreSQL, replace the Compose database service/connection string with the managed database endpoint and retain the explicit migration phase.
 
 ## File storage
