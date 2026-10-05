@@ -4,5 +4,13 @@
 .github
 .vs
 .vscode
+artifacts
 TestResults
 coverage
+data
+.env
+.env.*
+docker-compose*.yml
+README.md
+docs
+tests

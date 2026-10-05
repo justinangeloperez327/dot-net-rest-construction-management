@@ -1,14 +1,36 @@
 using System.Diagnostics;
 using Construction.Api.Configuration;
 using Construction.Api.Extensions;
+using Construction.Api.Hosting;
 using Construction.Infrastructure;
 using Construction.Infrastructure.Authentication;
 using Construction.Infrastructure.Files;
+using Construction.Infrastructure.Persistence;
 
 Activity.DefaultIdFormat = ActivityIdFormat.W3C;
 Activity.ForceDefaultIdFormat = true;
 
-var builder = WebApplication.CreateBuilder(args);
+if (ContainerHealthProbe.IsRequested(args))
+{
+    Environment.ExitCode =
+        await ContainerHealthProbe.RunAsync(args);
+
+    return;
+}
+
+bool migrateOnly = args.Contains(
+    "--migrate",
+    StringComparer.Ordinal);
+
+string[] hostArguments = args
+    .Where(argument =>
+        !string.Equals(
+            argument,
+            "--migrate",
+            StringComparison.Ordinal))
+    .ToArray();
+
+var builder = WebApplication.CreateBuilder(hostArguments);
 
 ProductionConfigurationValidator.Validate(
     builder.Configuration,
@@ -67,6 +89,11 @@ var fileStorageOptions = new FileStorageOptions
             : 104_857_600
 };
 
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.ShutdownTimeout = TimeSpan.FromSeconds(30);
+});
+
 builder.Services.AddApiServices(builder.Configuration);
 builder.Services.AddApiObservability(builder.Configuration);
 builder.Services.AddInfrastructure(
@@ -76,9 +103,23 @@ builder.Services.AddInfrastructure(
 
 var app = builder.Build();
 
+if (migrateOnly)
+{
+    await using AsyncServiceScope scope =
+        app.Services.CreateAsyncScope();
+
+    DatabaseInitializer initializer =
+        scope.ServiceProvider
+            .GetRequiredService<DatabaseInitializer>();
+
+    await initializer.InitializeAsync();
+
+    return;
+}
+
 app.UseApiPipeline();
 app.MapApiEndpoints();
 
-app.Run();
+await app.RunAsync();
 
 public partial class Program;
