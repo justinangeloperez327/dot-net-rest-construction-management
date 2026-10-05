@@ -28,6 +28,16 @@ jobs:
           healthcheck="$(docker image inspect construction-api:ci --format '{{json .Config.Healthcheck.Test}}')"
           test "$healthcheck" != "null"
 
+      - name: Validate production Compose
+        env:
+          CONSTRUCTION_API_IMAGE: construction-api:ci
+          POSTGRES_PASSWORD: production-compose-test-database-password
+          JWT_SIGNING_KEY: production-compose-test-signing-key-at-least-32-bytes
+          ALLOWED_ORIGIN: https://construction.example.test
+          ALLOWED_HOSTS: api.construction.example.test
+          OTLP_ENDPOINT: ""
+        run: docker compose -f docker-compose.production.yml config --quiet
+
       - name: Start container stack
         env:
           JWT_SIGNING_KEY: development-only-signing-key-change-before-use-2026
