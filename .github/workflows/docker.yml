@@ -61,8 +61,25 @@ jobs:
           container_id="$(docker compose ps -q api)"
           test -n "$container_id"
 
-          status="$(docker inspect "$container_id" --format '{{.State.Health.Status}}')"
-          test "$status" = "healthy"
+          for attempt in $(seq 1 30); do
+            status="$(docker inspect "$container_id" --format '{{.State.Health.Status}}')"
+
+            if [ "$status" = "healthy" ]; then
+              exit 0
+            fi
+
+            if [ "$status" = "unhealthy" ]; then
+              docker compose ps -a
+              docker compose logs --no-color api
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          docker compose ps -a
+          docker compose logs --no-color api
+          exit 1
 
       - name: Tear down container stack
         if: always()
