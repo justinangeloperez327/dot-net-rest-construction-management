@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Construction.Api.Authentication;
 using Construction.Api.Configuration;
@@ -352,9 +355,13 @@ public static class ServiceCollectionExtensions
                 PartitionedRateLimiter.Create<HttpContext, string>(
                     httpContext =>
                     {
+                        string? subject =
+                            httpContext.User.FindFirst("sub")?.Value;
+
                         string partitionKey =
-                            httpContext.Connection.RemoteIpAddress?.ToString()
-                            ?? "unknown";
+                            !string.IsNullOrWhiteSpace(subject)
+                                ? $"user:{subject}"
+                                : $"ip:{httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
 
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey,
@@ -369,6 +376,49 @@ public static class ServiceCollectionExtensions
                                 AutoReplenishment = true
                             });
                     });
+
+            options.OnRejected = async (
+                rateLimitContext,
+                cancellationToken) =>
+            {
+                HttpResponse response =
+                    rateLimitContext.HttpContext.Response;
+
+                response.StatusCode =
+                    StatusCodes.Status429TooManyRequests;
+                response.ContentType =
+                    "application/problem+json";
+
+                if (rateLimitContext.Lease.TryGetMetadata(
+                    MetadataName.RetryAfter,
+                    out TimeSpan retryAfter))
+                {
+                    response.Headers.RetryAfter =
+                        Math.Ceiling(retryAfter.TotalSeconds)
+                            .ToString(CultureInfo.InvariantCulture);
+                }
+
+                string? correlationId =
+                    rateLimitContext.HttpContext.Items[
+                        Middleware.CorrelationIdMiddleware.ItemKey]
+                        ?.ToString();
+
+                var problem = new
+                {
+                    type = "https://httpstatuses.com/429",
+                    title = "Too Many Requests",
+                    status = StatusCodes.Status429TooManyRequests,
+                    detail =
+                        "The request rate limit has been exceeded. Retry later.",
+                    correlationId,
+                    traceId = Activity.Current?.TraceId.ToString()
+                };
+
+                await JsonSerializer.SerializeAsync(
+                    response.Body,
+                    problem,
+                    cancellationToken: cancellationToken);
+            };
         });
 
         return services;
