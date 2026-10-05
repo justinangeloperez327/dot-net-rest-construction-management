@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0-noble AS restore
+FROM mcr.microsoft.com/dotnet/sdk:10.0.401-resolute AS restore
 WORKDIR /src
 
 COPY global.json Directory.Build.props Directory.Packages.props ./
@@ -14,7 +14,7 @@ COPY src ./src
 
 RUN dotnet publish src/Construction.Api/Construction.Api.csproj     --configuration Release     --output /app/publish     --no-restore     -p:UseAppHost=false     && mkdir -p /app/publish/data/uploads
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled-extra AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.12-noble-chiseled-extra AS runtime
 WORKDIR /app
 
 ENV ASPNETCORE_HTTP_PORTS=8080
