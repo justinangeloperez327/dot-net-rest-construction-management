@@ -14,10 +14,17 @@ public static class ApplicationBuilderExtensions
         app.UseMiddleware<CorrelationIdMiddleware>();
         app.UseMiddleware<RequestLoggingMiddleware>();
         app.UseExceptionHandler();
+        app.UseMiddleware<SecurityHeadersMiddleware>();
+
+        if (app.Environment.IsProduction())
+        {
+            app.UseHsts();
+        }
+
         app.UseHttpsRedirection();
         app.UseCors(ApiCorsPolicy.Name);
-        app.UseRateLimiter();
         app.UseAuthentication();
+        app.UseRateLimiter();
         app.UseAuthorization();
 
         return app;
