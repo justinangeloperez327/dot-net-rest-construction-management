@@ -170,7 +170,8 @@ public static class ServiceCollectionExtensions
                 | ForwardedHeaders.XForwardedProto;
             options.ForwardLimit = 1;
 
-            foreach (string proxy in apiOptions.TrustedProxies)
+            foreach (string proxy in apiOptions.TrustedProxies
+                .Where(proxy => !string.IsNullOrWhiteSpace(proxy)))
             {
                 options.KnownProxies.Add(IPAddress.Parse(proxy));
             }
@@ -441,7 +442,8 @@ public static class ServiceCollectionExtensions
 
     private static void ValidateApiOptions(ApiOptions options)
     {
-        foreach (string proxy in options.TrustedProxies)
+        foreach (string proxy in options.TrustedProxies
+            .Where(proxy => !string.IsNullOrWhiteSpace(proxy)))
         {
             if (!IPAddress.TryParse(proxy, out _))
             {
