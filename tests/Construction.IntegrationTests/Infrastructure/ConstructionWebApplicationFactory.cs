@@ -6,7 +6,9 @@ namespace Construction.IntegrationTests.Infrastructure;
 
 public sealed class ConstructionWebApplicationFactory(
     string connectionString,
-    string fileStorageRoot)
+    string fileStorageRoot,
+    int rateLimitPermitLimit = 10000,
+    int rateLimitWindowSeconds = 60)
     : WebApplicationFactory<AuthenticationController>
 {
     protected override void ConfigureWebHost(
@@ -36,6 +38,17 @@ public sealed class ConstructionWebApplicationFactory(
             fileStorageRoot);
         builder.UseSetting(
             "Api:RateLimitPermitLimit",
-            "10000");
+            rateLimitPermitLimit.ToString(
+                System.Globalization.CultureInfo.InvariantCulture));
+        builder.UseSetting(
+            "Api:RateLimitWindowSeconds",
+            rateLimitWindowSeconds.ToString(
+                System.Globalization.CultureInfo.InvariantCulture));
+        builder.UseSetting(
+            "Api:RateLimitQueueLimit",
+            "0");
+        builder.UseSetting(
+            "Observability:TraceSamplingRatio",
+            "1");
     }
 }

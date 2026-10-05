@@ -23,6 +23,12 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
     public ConstructionWebApplicationFactory Factory { get; private set; } =
         null!;
 
+    public string ConnectionString =>
+        _postgres.GetConnectionString();
+
+    public string FileStorageRoot =>
+        _fileStorageRoot;
+
     public string UserEmail { get; } =
         "integration.user@example.test";
 
@@ -41,8 +47,8 @@ public sealed class IntegrationTestFixture : IAsyncLifetime
         Directory.CreateDirectory(_fileStorageRoot);
 
         Factory = new ConstructionWebApplicationFactory(
-            _postgres.GetConnectionString(),
-            _fileStorageRoot);
+            ConnectionString,
+            FileStorageRoot);
 
         await using AsyncServiceScope scope =
             Factory.Services.CreateAsyncScope();
