@@ -1,9 +1,29 @@
+using System.Diagnostics;
+using Construction.Api.Configuration;
 using Construction.Api.Extensions;
 using Construction.Infrastructure;
 using Construction.Infrastructure.Authentication;
 using Construction.Infrastructure.Files;
 
+Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+Activity.ForceDefaultIdFormat = true;
+
 var builder = WebApplication.CreateBuilder(args);
+
+ProductionConfigurationValidator.Validate(
+    builder.Configuration,
+    builder.Environment);
+
+if (builder.Environment.IsProduction())
+{
+    builder.Logging.ClearProviders();
+    builder.Logging.AddJsonConsole(options =>
+    {
+        options.IncludeScopes = true;
+        options.UseUtcTimestamp = true;
+        options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
+    });
+}
 
 string databaseConnectionString =
     builder.Configuration.GetConnectionString("Database")
@@ -48,6 +68,7 @@ var fileStorageOptions = new FileStorageOptions
 };
 
 builder.Services.AddApiServices(builder.Configuration);
+builder.Services.AddApiObservability(builder.Configuration);
 builder.Services.AddInfrastructure(
     databaseConnectionString,
     jwtOptions,
