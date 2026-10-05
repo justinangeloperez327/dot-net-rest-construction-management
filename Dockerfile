@@ -12,7 +12,10 @@ RUN dotnet restore src/Construction.Api/Construction.Api.csproj
 FROM restore AS publish
 COPY src ./src
 
-RUN dotnet publish src/Construction.Api/Construction.Api.csproj     --configuration Release     --output /app/publish     --no-restore     -p:UseAppHost=false     && mkdir -p /app/publish/data/uploads
+ARG VERSION=0.1.0-local
+ARG SOURCE_REVISION=local
+
+RUN dotnet publish src/Construction.Api/Construction.Api.csproj     --configuration Release     --output /app/publish     --no-restore     -p:UseAppHost=false     -p:Version="$VERSION"     -p:SourceRevisionId="$SOURCE_REVISION"     && mkdir -p /app/publish/data/uploads
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0.12-noble-chiseled-extra AS runtime
 WORKDIR /app
