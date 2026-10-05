@@ -47,7 +47,8 @@ public sealed class SubmittalRevisionConfiguration
         builder.HasIndex(revision => new
         {
             revision.SubmittalId,
-            revision.IsCurrent
+            revision.IsCurrent,
+            revision.ReviewDueDate
         });
 
         builder.HasOne<ApplicationUser>()

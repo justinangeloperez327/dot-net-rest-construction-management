@@ -58,6 +58,13 @@ public sealed class ActivityConfiguration
             activity.Status
         });
 
+        builder.HasIndex(activity => new
+        {
+            activity.ProjectId,
+            activity.Status,
+            activity.PlannedEndDate
+        });
+
         builder.HasIndex(activity => activity.WorkPackageId);
         builder.HasIndex(activity => activity.LocationId);
 

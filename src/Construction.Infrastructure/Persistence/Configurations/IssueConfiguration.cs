@@ -65,6 +65,13 @@ public sealed class IssueConfiguration : IEntityTypeConfiguration<Issue>
             issue.DueDate
         });
 
+        builder.HasIndex(issue => new
+        {
+            issue.ProjectId,
+            issue.Status,
+            issue.DueDate
+        });
+
         builder.HasIndex(issue => issue.LocationId);
         builder.HasIndex(issue => issue.ActivityId);
         builder.HasIndex(issue => issue.ResponsibleUserId);
