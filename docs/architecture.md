@@ -1,55 +1,146 @@
 # Architecture
 
-The solution follows Clean Architecture.
+The backend follows Clean Architecture with strict inward dependency direction.
 
-Dependency direction:
+## Projects
 
-```
-Construction.Api
-      |
-      v
-Construction.Application
-      |
-      v
-Construction.Domain
+### Construction.Domain
 
-Construction.Infrastructure -> Construction.Application
-Construction.Infrastructure -> Construction.Domain
-Construction.Api -> Construction.Infrastructure
-```
+Owns business behavior:
 
-The Domain project must not depend on ASP.NET Core, Entity Framework Core, database providers, authentication libraries, or external integrations.
+- entities and aggregate roots;
+- invariants and state transitions;
+- domain events;
+- auditable/concurrency state;
+- construction-management business concepts.
 
-## Domain kernel
+It has no dependency on ASP.NET Core, Entity Framework Core, PostgreSQL, Identity, JWT libraries, logging providers, or other external integrations.
 
-The Domain layer provides identity-based entities, aggregate roots, domain events, value objects, domain exceptions, and auditable entities.
+### Construction.Application
 
-## Application kernel
+Owns application use cases and boundaries:
 
-The Application layer provides commands, queries, handlers, dispatch contracts, result/application-error types, validation contracts, pagination/sorting/filtering primitives, and abstractions for persistence and external capabilities.
+- commands, queries, and handlers;
+- application results/errors;
+- validation and paging/filtering primitives;
+- project-access guards;
+- authentication/authorization abstractions;
+- persistence abstractions;
+- file, notification, email, reporting, and time abstractions.
 
-Application depends only on Domain and the .NET base class library.
+Application depends on Domain but not Infrastructure or API.
 
-## Infrastructure persistence
+### Construction.Infrastructure
 
-Infrastructure owns Entity Framework Core, PostgreSQL, `ApplicationDbContext`, migrations, persistence interceptors, connection resiliency, and database health checks.
+Implements external concerns:
 
-## API delivery layer
+- EF Core / PostgreSQL;
+- `ApplicationDbContext`;
+- migrations and entity configurations;
+- optimistic concurrency persistence;
+- ASP.NET Core Identity stores;
+- JWT implementation;
+- local file storage;
+- notification/email adapters;
+- audit persistence;
+- optimized read-only reporting projections;
+- database health checks.
 
-The API project owns HTTP concerns:
+Infrastructure depends on Application and Domain.
 
-- `/api/v1` routing;
-- controllers;
+### Construction.Api
+
+Owns the HTTP boundary:
+
+- `/api/v1` controllers;
+- contracts;
+- authentication/authorization middleware;
 - RFC Problem Details;
-- exception-to-HTTP translation;
-- Application Result-to-HTTP translation;
-- correlation IDs;
-- request completion logging;
+- exception translation;
+- correlation and W3C trace IDs;
+- structured request logging;
 - CORS;
 - rate limiting;
-- health endpoints;
-- OpenAPI generation.
+- trusted forwarded headers;
+- security headers/HSTS;
+- OpenAPI;
+- liveness/readiness endpoints;
+- OpenTelemetry registration;
+- production configuration validation;
+- container migration and health-probe command modes.
 
-No HTTP type is exposed through Application or Domain.
+API depends on Application and Infrastructure.
 
-Business entities and use cases continue to be implemented vertically in later groups.
+## Dependency direction
+
+```text
+Construction.Api
+      |
+      +------> Construction.Application
+      |                 |
+      |                 v
+      |          Construction.Domain
+      |
+      +------> Construction.Infrastructure
+                        |
+                        +----> Construction.Application
+                        +----> Construction.Domain
+```
+
+No HTTP or EF Core type is exposed through Domain or Application.
+
+## Application structure
+
+Application features are organized vertically by use case instead of a single broad service layer.
+
+Examples:
+
+```text
+Projects/CreateProject
+Projects/UpdateProject
+Reports/GetProjectSummary
+Rfis/AnswerRfi
+PurchaseOrders/ReceivePurchaseOrder
+```
+
+Controllers remain thin:
+
+```text
+HTTP request
+   ↓
+Application handler
+   ↓
+Result
+   ↓
+HTTP response
+```
+
+## Persistence approach
+
+EF Core is used directly behind application-specific abstractions. The architecture deliberately avoids a generic `IRepository<T>` layer over every entity.
+
+Read/report queries favor:
+
+- projection;
+- `AsNoTracking()`;
+- database-side grouping/aggregation;
+- targeted indexes;
+- bounded exception lists.
+
+## Cross-cutting behavior
+
+The system includes:
+
+- immutable audit history;
+- UTC audit timestamps;
+- numeric optimistic-concurrency versions;
+- project-scoped authorization;
+- correlation IDs and W3C traces;
+- structured JSON production logging;
+- OpenTelemetry;
+- health checks;
+- explicit deployment migrations.
+
+## Enforcement
+
+`Construction.ArchitectureTests` verifies core dependency rules and API conventions as part of CI.

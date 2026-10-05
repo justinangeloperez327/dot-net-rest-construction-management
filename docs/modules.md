@@ -391,5 +391,3 @@ Quality reporting covers RFI, Submittal, Inspection, and Issue state, including 
 
 Procurement reporting combines equipment state/overdue maintenance, Purchase Request workflow, Purchase Order workflow, overdue active POs, and monetary totals grouped by currency. Values in different currencies are never added together.
 
-## Planned modules
-

@@ -1,43 +1,91 @@
 # Database
 
-The persistence implementation uses PostgreSQL through Entity Framework Core.
+Persistence uses PostgreSQL through Entity Framework Core.
 
 ## Current versions
 
 - Entity Framework Core: 10.0.12
 - Npgsql Entity Framework Core provider: 10.0.3
-- PostgreSQL development container: 18
+- PostgreSQL container: 18
 
 Package versions are centrally managed in `Directory.Packages.props`.
 
 ## Context boundary
 
-`ApplicationDbContext` implements the Application-layer `IApplicationDbContext` contract. No Entity Framework Core types are exposed through the Application or Domain projects.
+`ApplicationDbContext` belongs to Infrastructure and implements the Application persistence boundary. EF Core types do not leak into Domain or Application public contracts.
 
-Entity configurations are discovered from the Infrastructure assembly. Feature-specific configuration classes will be added alongside each persistent domain module.
+Entity configurations are discovered from the Infrastructure assembly.
 
 ## Transactions
 
-Entity Framework Core already wraps a single `SaveChanges` operation in a transaction when supported by the provider. An explicit cross-operation transaction abstraction is intentionally deferred until a real use case requires multiple persistence boundaries in one application operation.
+EF Core supplies transaction semantics for a normal `SaveChanges` operation.
+
+No generic Unit of Work abstraction is layered over EF Core merely for architectural ceremony. Explicit transaction handling should be introduced only for use cases requiring multiple persistence boundaries.
 
 ## Auditing
 
-`AuditableEntityInterceptor` applies UTC creation and modification timestamps using the .NET `TimeProvider` abstraction. HTTP context and user identity are not accessed by the persistence interceptor.
+Auditable entities/aggregate roots carry:
 
-## Concurrency
+```text
+CreatedAtUtc
+LastModifiedAtUtc
+Version
+```
 
-Concurrency tokens are configured per aggregate when the aggregate is introduced. A global concurrency property is not imposed on every entity because not every entity has the same conflict semantics.
+Infrastructure persistence interceptors set UTC audit timestamps and advance the numeric concurrency version.
+
+Central audit-log persistence separately records sanitized entity changes and explicit authentication security events.
+
+## Optimistic concurrency
+
+`Version` is configured as an EF Core concurrency token for auditable entities.
+
+Behavior:
+
+```text
+insert       -> Version = 1
+valid update -> Version increments
+stale update -> DbUpdateConcurrencyException
+```
+
+The PostgreSQL integration suite verifies stale-write rejection against the real provider.
 
 ## Migrations
 
-The repository contains a local `dotnet-ef` tool manifest pinned to the matching EF Core patch version.
+The repository contains a local `dotnet-ef` tool manifest aligned with EF Core.
 
-Migrations are committed whenever a persistent module is introduced. Generated migration files are treated as generated code by analyzers and should not be hand-edited merely to satisfy style rules.
+Persistent model changes require committed migrations.
 
-## Database initialization
+Integration startup calls `HasPendingModelChanges()`; CI fails when the runtime model and migration snapshot diverge.
 
-`DatabaseInitializer` applies pending migrations. Deployment environments should invoke migration initialization deliberately rather than relying on schema creation through `EnsureCreated`.
+Generated migration files are treated as generated code and excluded from hand-written-code analyzer rules.
 
-## Health checks
+## Deployment
 
-Infrastructure registers an Entity Framework Core database health check named `postgresql` with `ready` and `database` tags.
+The normal API process does not migrate the database automatically.
+
+Deployment runs:
+
+```text
+dotnet Construction.Api.dll --migrate
+```
+
+as an explicit one-shot phase before API replicas start.
+
+The migration command also runs Identity seed initialization.
+
+See `docs/deployment.md`.
+
+## PostgreSQL 18 container storage
+
+The official PostgreSQL 18 image uses its versioned data directory underneath:
+
+```text
+/var/lib/postgresql
+```
+
+Both Compose files mount the persistent database volume at that path.
+
+## Health
+
+Infrastructure registers the PostgreSQL readiness check with `ready` and `database` tags.

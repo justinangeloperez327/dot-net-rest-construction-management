@@ -1,33 +1,66 @@
 # Testing
 
-The solution uses four test projects with separate responsibilities:
+The solution uses four test projects with distinct responsibilities.
 
-- `Construction.Domain.Tests` verifies aggregate invariants and state machines.
-- `Construction.Application.Tests` verifies use-case behavior, authorization boundaries, validation, and orchestration with lightweight fakes.
-- `Construction.IntegrationTests` runs against a disposable PostgreSQL 18 container and the real ASP.NET Core application host.
-- `Construction.ArchitectureTests` enforces Clean Architecture dependency direction and API controller conventions.
+## Construction.Domain.Tests
+
+Verifies aggregate invariants and state machines, including project/activity/equipment/issue/procurement behavior.
+
+## Construction.Application.Tests
+
+Verifies application orchestration such as authorization boundaries, project-access checks, validation, and reporting date logic using lightweight fakes.
+
+## Construction.IntegrationTests
+
+Runs against a disposable PostgreSQL 18 container and the real ASP.NET Core host.
+
+Coverage includes:
+
+- migrations/model-snapshot integrity;
+- real database constraints;
+- optimistic concurrency;
+- reporting SQL projections;
+- authentication success/failure;
+- JWT current-user access;
+- 401/403 behavior;
+- Problem Details;
+- security headers;
+- correlation/trace behavior;
+- liveness/readiness;
+- rate limiting and `Retry-After`;
+- production configuration validation.
+
+EF Core InMemory is intentionally not used for provider-sensitive tests.
+
+## Construction.ArchitectureTests
+
+Enforces:
+
+- Domain has no Application/Infrastructure/API dependency;
+- Application has no Infrastructure/API dependency;
+- Infrastructure has no API dependency;
+- API controller conventions.
 
 ## Test stack
 
 - xUnit v3
+- Microsoft Testing Platform
 - ASP.NET Core MVC testing
 - Testcontainers for PostgreSQL
-- Microsoft Testing Platform
 - Microsoft code coverage extension
 
-Integration tests intentionally use PostgreSQL rather than EF Core InMemory so provider behavior, constraints, migrations, query translation, and optimistic concurrency are exercised.
-
-## Run locally
+## Local execution
 
 Docker must be available for the integration suite.
 
 ```bash
 dotnet restore Construction.sln
-dotnet build Construction.sln --configuration Release
-dotnet test Construction.sln --configuration Release --no-build
+dotnet format Construction.sln --verify-no-changes --no-restore
+dotnet build Construction.sln --configuration Release --no-restore
+dotnet test --solution Construction.sln --configuration Release --no-build
 ```
 
-To collect coverage:
+Coverage:
 
 ```bash
 dotnet test \
@@ -39,20 +72,19 @@ dotnet test \
   --coverage-output-format cobertura
 ```
 
-## Current quality coverage
+## CI quality gate
 
-The suite includes coverage for:
+`CI / build-and-test` performs:
 
-- core Domain workflow and invariant behavior;
-- application authorization and reporting date validation;
-- Clean Architecture project-reference rules;
-- controller sealing conventions;
-- real PostgreSQL unique constraints;
-- optimistic concurrency/stale-write rejection;
-- reporting SQL projections and aggregates;
-- authentication success/failure;
-- authenticated current-user access;
-- authorization rejection for missing permissions;
-- API ProblemDetails error payloads.
+```text
+restore
+format verification
+Release build
+all four test projects
+coverage collection
+test-result artifact upload
+```
 
-CI runs Release build plus all four test projects and stores TRX/coverage output as a workflow artifact.
+The CI command sets a minimum expected discovered-test count so a broken test-discovery configuration cannot silently pass with zero tests.
+
+Docker and dependency-security checks are separate required release gates described in `docs/release.md`.
