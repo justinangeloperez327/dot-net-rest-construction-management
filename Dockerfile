@@ -17,7 +17,7 @@ ARG SOURCE_REVISION=local
 
 RUN dotnet publish src/Construction.Api/Construction.Api.csproj     --configuration Release     --output /app/publish     --no-restore     -p:UseAppHost=false     -p:Version="$VERSION"     -p:SourceRevisionId="$SOURCE_REVISION"     && mkdir -p /app/publish/data/uploads
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.12-noble-chiseled-extra AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.13-noble-chiseled-extra AS runtime
 WORKDIR /app
 
 ENV ASPNETCORE_HTTP_PORTS=8080
