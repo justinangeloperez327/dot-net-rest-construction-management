@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.401-resolute AS restore
+FROM mcr.microsoft.com/dotnet/sdk:10.0.403-resolute AS restore
 WORKDIR /src
 
 COPY global.json Directory.Build.props Directory.Packages.props .editorconfig ./
